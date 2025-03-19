@@ -1,0 +1,16 @@
+.modal{
+    width: 580px !important;
+}
+
+.timeout__select{
+    width: 100% !important;
+    flex: 1 !important;
+
+}
+.action{
+    width: 100% !important;
+
+}
+.action button{
+    min-width: 100px !important;
+}

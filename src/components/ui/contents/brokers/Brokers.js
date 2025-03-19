@@ -8,82 +8,77 @@ const columns = [
     },
     {
         title: 'Status',
-        dataIndex: 'age',
-        key: 'age',
+        dataIndex: 'status',
+        key: 'status',
     },
     {
         title: 'PID',
-        dataIndex: 'address',
-        key: 'address',
+        dataIndex: 'pid',
+        key: 'pid',
     },
     {
         title: 'PORT',
-        key: 'tags',
-        dataIndex: 'tags'
+        key: 'port',
+        dataIndex: 'port'
     },
     {
         title: 'AS',
-        key: 'tags',
-        dataIndex: 'tags'
+        key: 'as',
+        dataIndex: 'as'
     },
     {
         title: 'JQ',
-        key: 'tags',
-        dataIndex: 'tags'
+        key: 'jq',
+        dataIndex: 'jq'
     },
     {
         title: 'REQ',
-        dataIndex: 'address',
-        key: 'address',
+        dataIndex: 'req',
+        key: 'req',
     },
     {
         title: 'TPS',
-        key: 'tags',
-        dataIndex: 'tags'
+        key: 'tps',
+        dataIndex: 'tps'
     },
     {
         title: 'QPS',
-        key: 'tags',
-        dataIndex: 'tags'
+        key: 'qps',
+        dataIndex: 'qps'
     },
     {
         title: 'LONG-T',
-        key: 'tags',
-        dataIndex: 'tags'
+        key: 'long_t',
+        dataIndex: 'long_t',
     },
     {
         title: 'LONG-Q',
-        dataIndex: 'address',
-        key: 'address',
+        dataIndex: 'long_q',
+        key: 'long_q',
     },
     {
         title: 'EER-Q',
-        key: 'tags',
-        dataIndex: 'tags'
+        key: 'err_q',
+        dataIndex: 'err_q'
     }
 ];
 const data = [
     {
         key: '1',
-        name: 'John Brown',
-        age: 32,
-        address: 'New York No. 1 Lake Park',
-        tags: ['nice', 'developer'],
-    },
-    {
-        key: '2',
-        name: 'Jim Green',
-        age: 42,
-        address: 'London No. 1 Lake Park',
-        tags: ['loser'],
-    },
-    {
-        key: '3',
-        name: 'Joe Black',
-        age: 32,
-        address: 'Sydney No. 1 Lake Park',
-        tags: ['cool', 'teacher'],
-    },
+        name: 'query_editor',
+        status: 'ON',
+        pid: '2831',
+        port: '33000',
+        as: '5',
+        qj:'0',
+        req: '419',
+        qps: '193',
+        tps: '97',
+        long_t: '0/60000',
+        long_q: '0/60000',
+        err_q: '0'
+
+    }
 ];
 const Brokers = () => <Table pagination={false} columns={columns} dataSource={data} />;
 export default Brokers;

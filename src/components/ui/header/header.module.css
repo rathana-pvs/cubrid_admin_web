@@ -1,0 +1,30 @@
+
+
+.header {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    background-color: white;
+}
+.logo__wrapper {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+.logo__title {
+    font-size: 18px;
+    color: var(--primary-color);
+    padding: 0 12px;
+    font-weight: bold;
+}
+.logo{
+    height: 40px;
+}
+.menu__wrapper{
+    display: flex;
+}
+.button{
+    height: 40px;
+    font-weight: 500;
+}

@@ -1,0 +1,98 @@
+.ant-layout-header {
+    line-height: unset;
+}
+.ant-modal-title{
+    text-align: center;
+    color: var(--primary-color) !important;
+    font-weight: bold !important;
+}
+
+.ant-form-item{
+    margin-bottom: 10px !important;
+}
+.ant-form-item-explain-error{
+    /*font-size: 13px;*/
+    color: var(--danger-color);
+}
+.ant-form-item-label{
+    /*padding-bottom: 4px !important;*/
+}
+.ant-form-item-label >label, .ant-checkbox-label{
+    /*font-size: 14px !important;*/
+    font-weight: 500 !important;
+    color: var(--primary-color) !important;
+}
+.ant-input{
+    height: 32px !important;
+    /*border-radius: 4px !important;*/
+    /*font-size: 12px !important;*/
+}
+.ant-checkbox .ant-checkbox-inner{
+    /*border-radius: 4px !important;*/
+}
+
+.ant-select-selector{
+    /*border-radius: 4px !important;*/
+    height: 32px !important;
+
+}
+.ant-input-affix-wrapper{
+    /*border-radius: 4px !important;*/
+    padding: 0 12px !important;
+}
+.ant-select-item-option-selected:not(.ant-select-item-option-disabled){
+    /*font-size: 16px !important;*/
+    color: var(--primary-color) !important;
+    background-color: color-mix(in srgb, var(--primary-color) 20%, transparent) !important;
+
+}
+.ant-select-dropdown{
+    border-radius: 4px !important;
+    padding:0;
+}
+.ant-select-dropdown .ant-select-item{
+    border-radius: 0 !important;
+    /*padding: 0 12px !important;*/
+    /*height: 36px !important;*/
+    /*line-height: 36px !important;*/
+    /*font-size: 14px;*/
+    font-weight: 500 !important;
+}
+
+/*.ant-tree-title{*/
+/*    font-weight: 500 !important;*/
+/*}*/
+.ant-select-single{
+    /*font-size: 14px !important;*/
+    height: 32px !important;
+}
+.ant-form-item-label{
+    text-align: left !important;
+}
+.ant-btn-color-primary{
+    box-shadow: none;
+}
+th.ant-table-cell{
+    padding: 6px 12px !important;
+}
+
+.ant-tabs-tab-with-remove{
+    padding: 2px 16px !important;
+    background: rgb(44, 62, 80, 0.08) !important;
+}
+.ant-tabs-tab-active{
+    background: white !important;
+    font-weight: 500 !important;
+}
+/*.ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled){*/
+/*    background: var(--primary-color) !important;*/
+/*    color: white;*/
+/*}*/
+/*.ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled):hover{*/
+/*    background: color-mix(in srgb, var(--primary-color) 90%, transparent) !important;*/
+/*    color: white;*/
+/*}*/
+/*.ant-tree-node-content-wrapper.ant-tree-node-selected{*/
+/*    background-color: color-mix(in srgb, var(--primary-color) 15%, transparent) !important;*/
+/*    color: var(--primary-color) !important;*/
+/*}*/

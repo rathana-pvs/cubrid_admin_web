@@ -1,21 +1,14 @@
-const axios = require('axios');
-const https = require('https');
+import axiosInstance from "@/lib/agent";
 
-
-
-export const getLogin = ({server, login})=>{
-
-
-    return axios.post('https://localhost:8011/cm_api', {
-        task: "login",
-        id: "admin",
-        password: "root",
+export default async function(req, res) {
+    const { host, port, login } = req.body;
+    await axiosInstance.post(`https://${host}:${port}/cm_api`, {
+        ...login,
+        task:"login",
         clientver: "11.3"
-    }, )
+    })
         .then(response => {
-
-            console.log(response.data);
-            return response.data;
+            res.status(200).json(response.data);
         })
         .catch(error => {
             console.error("Error:", error.message);

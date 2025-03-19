@@ -1,55 +1,47 @@
-import React from 'react';
-import {Card, Row, Col, Typography, Menu} from 'antd';
-import { EditOutlined, DeleteOutlined, DatabaseOutlined, DesktopOutlined, LinkOutlined } from '@ant-design/icons';
-import ConnectionCard from "@/components/ui/ConnectionCard/ConnectionCard";
-import styled from "styled-components";
-import {Header} from "antd/es/layout/layout";
+import React, {useEffect} from 'react';
+import {Col, Row} from 'antd';
+import Header from "@/components/ui/header/Header";
+import styles from "./connection.module.css";
+import NewConnection from "@/components/ui/create-connection/NewConnection";
+import {ConnectionProvider, useConnectionContext} from "@/context/AppContext";
+import {getLocalStorage} from "@/utils/storage";
+import ConnectionCard from "@/components/ui/connection-card/ConnectionCard";
 
 
-// Mock data for connections
-const connections = [
-    { title: 'Connection 1', server: 'localhost', port: 33000, db: 'demodb', color:"secondary"},
-    { title: 'Connection 2', server: 'localhost', port: 33001, db: 'demodb' },
-    { title: 'Connection 3', server: 'localhost', port: 33002, db: 'demodb', color:"warning" },
-    { title: 'Connection 4', server: 'localhost', port: 33003, db: 'demodb' },
-    { title: 'Connection 5', server: 'localhost', port: 33004, db: 'demodb' },
-    { title: 'Connection 6', server: 'localhost', port: 33005, db: 'demodb' },
-];
+const ConnectionPage = () => {
+    const {state, dispatch} = useConnectionContext();
 
+    useEffect(()=>{
+        const connections = getLocalStorage("connections");
+        dispatch({type:"CONNECTION_DATA", payload:connections??[]});
 
-const Layout = styled.div`
-  display: flex;
-    justify-content: center;
-    
-    
-    
-`;
-const Wrapper = styled.div`
-    max-width: 1200px;
-    padding: 24px;
-`;
-
-const CardsPage = () => {
+    },[])
+    console.log(state)
     return (
         <>
-            <Header style={{ display: 'flex', alignItems: 'center' }}>
-                <div className="demo-logo" />
-            </Header>
-            <Layout>
-                <Wrapper>
-                    <Row gutter={[16, 16]}>
-                        {connections.map((connection, index) => (
-                            <Col key={index} xs={24} sm={24} md={12} lg={12} xl={8}>
-                                <ConnectionCard {...connection} />
-                            </Col>
-                        ))}
-                    </Row>
-                </Wrapper>
+                <Header/>
+                <div className={styles.layout}>
+                    <div className={styles.layout__wrapper}>
+                        <Row gutter={[24, 24]}>
+                            {state.connection_data.map((connection, index) => (
+                                <Col key={index} xs={24} sm={24} md={12} lg={12} xl={8}>
+                                    <ConnectionCard {...connection} />
+                                </Col>
+                            ))}
+                        </Row>
+                    </div>
+                    <NewConnection open={true}/>
+                </div>
 
-            </Layout>
         </>
 
     );
 };
+const Connection = () => (
+    <ConnectionProvider>
+        <ConnectionPage/>
+    </ConnectionProvider>
+)
 
-export default CardsPage;
+export default Connection;
+

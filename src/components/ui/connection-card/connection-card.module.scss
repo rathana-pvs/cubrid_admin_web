@@ -12,7 +12,7 @@
     align-items: center;
 }
 .card__color i{
-    font-size: 32px;
+    font-size: 40px;
     color: var(--primary-color);
 }
 
@@ -36,15 +36,38 @@
 }
 
 .card__decor{
-    width: 35%;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-right: 12px;
+    margin: 0 12px;
 }
-.card__decor img{
-    width: 100%;
-    height: auto;
+.card__decor svg{
+    color: var(--primary-color);
+    opacity: 0.1;
+    height: 170px;
+    position: absolute;
+    right: -4px;
+
+
+}
+
+.card__decor__secondary{
+    svg{
+        color: var(--secondary-color);
+    }
+}
+
+.card__decor__warning{
+    svg{
+        color: var(--warning-color);
+        opacity: 0.2;
+    }
+}
+
+.card__decor__danger{
+    svg{
+        color: var(--danger-color);
+    }
 }
 
 .card__color__secondary{
@@ -58,5 +81,12 @@
     background-color: color-mix(in srgb, var(--warning-color) 15%, transparent);
     i{
         color: var(--warning-color);
+    }
+}
+
+.card__color__danger{
+    background-color: color-mix(in srgb, var(--danger-color) 15%, transparent);
+    i{
+        color: var(--danger-color);
     }
 }

@@ -1,19 +1,19 @@
 import { createContext, useReducer, useContext } from "react";
-import { connectionReducer, initialState } from "@/context/ConnectionReducer";
+import { appReducer, initialState } from "@/context/AppReducer";
 
 // Create the context
-const ConnectionContext = createContext();
+const AppContext = createContext();
 
 // Provider component
-export const ConnectionProvider = ({ children }) => {
-    const [state, dispatch] = useReducer(connectionReducer, initialState);
+export const AppProvider = ({ children }) => {
+    const [state, dispatch] = useReducer(appReducer, initialState);
 
     return (
-        <ConnectionContext.Provider value={{ state, dispatch }}>
+        <AppContext.Provider value={{ state, dispatch }}>
             {children}
-        </ConnectionContext.Provider>
+        </AppContext.Provider>
     );
 };
 
 // Custom hook to use the store
-export const useConnectionContext = () => useContext(ConnectionContext);
+export const useAppContext = () => useContext(AppContext);

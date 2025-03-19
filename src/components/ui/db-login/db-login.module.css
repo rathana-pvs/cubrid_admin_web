@@ -2,15 +2,31 @@
     width: 580px !important;
 }
 
-.timeout__select{
-    width: 100% !important;
-    flex: 1 !important;
-
+.jdbc__modal{
+    width: 400px !important;
 }
+
+
 .action{
     width: 100% !important;
 
 }
 .action button{
     min-width: 100px !important;
+}
+
+.custom__label{
+    font-size: 12px;
+    font-weight: 500;
+}
+.purpose__container{
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.purpose__select{
+    width: 150px !important;
+}
+.td__cell{
+    padding: 0 !important;
 }
