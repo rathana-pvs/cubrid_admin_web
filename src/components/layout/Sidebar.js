@@ -9,6 +9,7 @@ import styles from './layout.module.scss';
 import IconButton from "@/components/ui/button/IconButton";
 import SideProperty from "@/components/ui/side-property";
 import SideTree from "@/components/ui/side-tree";
+import SideTreeBackup from "@/components/ui/side-tree/SideTreeBackup";
 
 const App = () => {
     const {
@@ -41,7 +42,7 @@ const App = () => {
                    </div>
                </div>
                <div className={styles.tree__container}>
-                   <SideTree/>
+                   <SideTreeBackup/>
                </div>
 
                <div className={styles.side__property}>

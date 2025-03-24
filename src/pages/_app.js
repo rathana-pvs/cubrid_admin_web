@@ -28,7 +28,7 @@ const theme = {
             cardPadding: '2px 8px',
         },
         Table:{
-            cellPaddingBlock: 5
+            cellPaddingBlock: 2
         }
     },
 };

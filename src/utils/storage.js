@@ -1,4 +1,8 @@
 // Save data to localStorage
+import {isNotEmpty} from "@/utils/utils";
+import {nanoid} from "nanoid";
+import React from "react";
+
 export const setLocalStorage = (key, value) => {
     if (typeof window !== "undefined") {
         localStorage.setItem(key, JSON.stringify(value));
@@ -15,9 +19,23 @@ export const getLocalStorage = (key) => {
 
 export const getLocalConnections = () => {
     if (typeof window !== "undefined") {
-        const data = localStorage.getItem("connections");
-        return data ? JSON.parse(data) : [];
+        let data = localStorage.getItem("connections");
+        data = data?JSON.parse(data):[];
+        if(isNotEmpty(data)) {
+            data.forEach(item => {
+                const id = nanoid(8);
+                item["login"] = {id: item.id, password: item.password};
+                item["key"] = id
+                item["title"] = item["name"]
+                item["id"] = id
+                item["type"] = "server"
+                item["icon"] = <i className="fa-light fa-server success"/>
+            })
+
+        }
+        return data
     }
+    return []
 };
 
 

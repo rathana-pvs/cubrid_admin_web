@@ -10,13 +10,15 @@ import {nanoid} from "nanoid";
 import {setLocalStorage} from "@/utils/storage";
 import Servers from "@/components/ui/contents/Servers";
 import Tables from "@/components/ui/contents/tables";
+import {info} from "sass";
 
 
-
+const tempTree = []
 const App = () => {
     const {state, dispatch} = useAppContext();
     const [menTable, setMenuTable] = useState({ x: 0, y: 0, open:false });
     const [treeData, setTreeData] = useState([]);
+    const [treeItems, setTreeItems] = useState([]);
     const [expandKey, setExpandKey] = useState('0-0');
     const onSelect = async (selectedKeys, info) => {
         if (info.node.type === "server"){
@@ -62,10 +64,7 @@ const App = () => {
     };
 
     const handleContextMenu = ({event}) => {
-        console.log(event);
         setMenuTable({ x: event.clientX, y: event.clientY, open: true });
-
-
     };
 
     const loadData = async (node) => {
@@ -85,9 +84,7 @@ const App = () => {
                         children: [],
                         server: node.title
                     }))
-
                     setTreeData((prevTreeData) => updateTreeData(prevTreeData, node.key, newChildren));
-
                 }
                 break
             }
@@ -106,7 +103,13 @@ const App = () => {
 
                 const {ids, obj} = generateIdObject([...activeList, ...deActiveList], {server_id: sharedData.uuid})
 
-                dispatch({type: "SERVER_DATA", payload: {...state.servers, databases: ids}})
+                const updatedServer = state.servers.map(res=>{
+                    if(res.name === node.id ){
+                        res["databases"] = ids
+                    }
+                    return res
+                })
+                dispatch({type: "SERVER_DATA", payload: updatedServer})
                 dispatch({type: "DATABASE_DATA", payload: obj})
 
                 const newChildren = [...activeList, ...deActiveList].map((item, index) => {
@@ -488,6 +491,85 @@ const App = () => {
         return [[...systemTables, ...userTables], [...systemViews, ...userViews]];
 
     }
+
+
+    useEffect(()=>{
+
+        const newDatabase = []
+        for(const [key, item] of state.databases){
+
+
+            newDatabase.push( {
+                title: item.dbname,
+                key: item.key,
+                type: "database",
+                icon: <i className={`fa-light fa-database ${item.status === "inactive"?"warning": "success"}`}/>,
+                children: [
+                    {
+                        ref: item.ref,
+                        title: "Tables",
+                        key: `${item.key}-0`,
+                        database_id: key,
+                        type: "classes",
+                        virtual: false,
+                        icon: <i className="fa-light fa-table-tree"/>,
+
+                    },
+                    {
+                        title: "Views",
+                        key: `${item.key}-1`,
+                        database: item.dbname,
+                        database_id: key,
+                        type: "classes",
+                        virtual: true,
+                        icon: <i className="fa-light fa-eye"></i>,
+
+                    },
+                    {
+                        title: "Serial",
+                        key: `${item.key}-2`,
+                        database: item.dbname,
+                        database_id: key,
+                        type: "tables",
+                        icon: <i className="fa-light fa-input-numeric"></i>,
+
+                    },
+                    {
+                        title: "Users",
+                        key: `${item.key}-3`,
+                        database: item.dbname,
+                        database_id: key,
+                        type: "users",
+                        icon: <i className="fa-light fa-users"></i>,
+
+                    },
+                    {
+                        title: "Trigger",
+                        key: `${item.key}-4`,
+                        database: item.dbname,
+                        database_id: key,
+                        type: "trigger",
+                        icon: <i className="fa-light fa-gears"></i>,
+
+                    },
+                    {
+                        title: "Synonyms",
+                        key: `${item.key}-5`,
+                        database: item.dbname,
+                        database_id: key,
+                        type: "tables",
+                        icon: <i className="fa-light fa-table-list"></i>,
+
+                    },
+
+                ]
+
+            })
+        }
+
+
+
+    },[state.servers, state.databases])
 
 
 
