@@ -15,51 +15,50 @@ export const initialState = {
     views: [],
     users:[],
     triggers: [],
-    columns: []
+    columns: [],
+    serials: [],
+    synonyms: [],
+    connection: {
+        type:"",
+        open: false
+    }
 };
 
 export const appReducer = (state, action) => {
     switch (action.type) {
-        case "CREAT_CONNECTION_STATE":
-            return { ...state, isOpen: action.payload };
+        case "CONNECTION":
+            return { ...state, connection: action.payload };
         case "LOGIN_DB_STATE":
             return { ...state, isOpenDBLogin: action.payload };
         case "CONNECTION_DATA":
             return { ...state, connection_data: action.payload };
-
         case "SERVER_DATA":
             return { ...state, servers: action.payload };
+        case "SERVERS":
+            return { ...state, servers: action.payload};
         case "SUB_SERVER":
             return { ...state, sub_server: action.payload };
-
         case "DATABASE_DATA":
             return { ...state, databases: {...state.databases, ...action.payload }};
         case "DATABASES":
             return { ...state, databases: action.payload };
         case "SUB_DATABASE":
             return { ...state, sub_database: action.payload };
-
         case "TABLES":
             return { ...state, tables: action.payload };
         case "VIEWS":
             return { ...state, views: action.payload };
-        case "TABLE_DATA":
-            return { ...state, tables: {...state.tables, ...action.payload} };
+        case "SERIALS":
+            return { ...state, serials: action.payload };
+        case "SYNONYMS":
+            return { ...state, synonyms: action.payload };
 
-        case "VIEW_DATA":
-            return { ...state, views: {...state.views, ...action.payload} };
         case "USERS":
             return { ...state, users: action.payload };
         case "TRIGGERS":
             return { ...state, triggers: action.payload };
-
-        case "COLUMN_DATA":
-            return { ...state, columns: {...state.columns, ...action.payload} };
         case "COLUMNS":
             return { ...state, columns: action.payload };
-
-        case "CONSTRAINT_DATA":
-            return { ...state, constraint: {...state.constraint, ...action.payload} };
 
         case "CONTENTS":
             return { ...state, contents: action.payload };

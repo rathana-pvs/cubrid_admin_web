@@ -1,9 +1,10 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {Button, Checkbox, Col, Form, Input, message, Modal, Row, Select, Space} from "antd";
 import {useAppContext} from "@/context/AppContext";
 import styles from "./new-connection.module.css";
-import {appendToLocalStorage} from "@/utils/storage";
+import {appendToLocalStorage, createServerFormat, getLocalStorage, setLocalStorage} from "@/utils/storage";
 import { v4 as uuid } from 'uuid';
+import {nanoid} from "nanoid";
 export default function () {
     const {state, dispatch} = useAppContext();
     const [form] = Form.useForm();
@@ -16,23 +17,31 @@ export default function () {
 
 
     const handleSubmit = (values) => {
-        // Simulate connection logic
         const connectionDetails = {
-            name:values.name,
-            host: values.host,
-            port: values.port,
-            id: values.id,
-            uuid: uuid(),
-            password: values.password,
+            ...values,
             timeout: -1,
             ...checkBoxFields
             // autoCommit: autoCommit,
         };
 
         if(action === "save"){
-            appendToLocalStorage("connections", connectionDetails);
-            const connections = [...state.server,connectionDetails]
-            dispatch({type: "NESTED_VALUE", path:"server", payload: connections});
+            if(state.connection.type === "add"){
+                connectionDetails.server_id = nanoid(8);
+                const server = createServerFormat(connectionDetails)
+                const connections = [...state.servers, server];
+                setLocalStorage("connections", connections);
+                dispatch({type: "SERVERS", payload: connections})
+            }else{
+                const connections = state.servers.map((connection) => {
+                    if(connection.server_id === state.connection.server_id){
+                        return createServerFormat({...connection,...connectionDetails})
+                    }
+                    return connection;
+                })
+                setLocalStorage("connections", connections);
+                dispatch({type: "SERVERS", payload: connections});
+
+            }
 
             handleClose(true)
         }
@@ -49,16 +58,29 @@ export default function () {
     }
 
     function handleClose(status) {
-        dispatch({type: "CREAT_CONNECTION_STATE", payload: false})
+        dispatch({type: "CONNECTION", payload:{...state.connection, open:false}});
         if(status){
             form.resetFields();
         }
 
     }
+    useEffect(() => {
+        if(state.connection.open){
+            form.resetFields();
+            if(state.connection.type === "edit"){
+                const server = state.servers.find(s => s.server_id === state.connection.server_id);
+                form.setFieldsValue(server);
+            }
+        }
+
+    }, [state.connection]);
 
     return (
         <>
-            <Modal className={styles.modal} closeIcon={null} title="New Connection" maskClosable={false} open={state.isOpen} onOk={() => handleClose(true)}
+            <Modal className={styles.modal} closeIcon={null}
+                   title={state.type==="add"? "New Connection": "Edit Connection"}
+                   maskClosable={false} open={state.connection.open}
+                   onOk={() => handleClose(true)}
                    onCancel={() => handleClose(false)} footer={null} centered={true}>
 
                 <Form form={form} onFinish={handleSubmit} autoComplete="off" layout="vertical">

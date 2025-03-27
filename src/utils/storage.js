@@ -17,19 +17,23 @@ export const getLocalStorage = (key) => {
     }
 };
 
+export const createServerFormat =(item)=>{
+    item["login"] = {id: item.id, password: item.password};
+    item["key"] = item.server_id
+    item["title"] = item["name"]
+    item["server_id"] = item.server_id
+    item["type"] = "server"
+    item["icon"] = <i className="fa-light fa-server success"/>
+    return item;
+}
+
 export const getLocalConnections = () => {
     if (typeof window !== "undefined") {
         let data = localStorage.getItem("connections");
         data = data?JSON.parse(data):[];
         if(isNotEmpty(data)) {
             data.forEach(item => {
-                const id = nanoid(8);
-                item["login"] = {id: item.id, password: item.password};
-                item["key"] = id
-                item["title"] = item["name"]
-                item["id"] = id
-                item["type"] = "server"
-                item["icon"] = <i className="fa-light fa-server success"/>
+                return createServerFormat(item);
             })
 
         }

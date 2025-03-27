@@ -16,7 +16,8 @@ function AppBar(props) {
                 </div>
 
                 <div className={styles.appbar__menu__container}>
-                    <Button className={styles.appbar__menu__button} onClick={()=>dispatch({type:"CREAT_CONNECTION_STATE", payload:true})}>
+                    <Button className={styles.appbar__menu__button}
+                            onClick={()=>dispatch({type:"CONNECTION", payload:{type:"add", open: true}})}>
                         <img src={"/add-host.png"} alt={"add host"}/>
                         <div>Host</div>
                     </Button>

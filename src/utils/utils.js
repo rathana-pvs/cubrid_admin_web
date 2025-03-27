@@ -81,3 +81,19 @@ export const findServer = (id, state, type) => {
 
     return key
 };
+
+
+export const getDatabaseLogin = (server, database) => {
+    return {host: server.host, port: "33000", database: database.title, user: "dba", password: ""};
+}
+
+export const getFormattedResults = (result) => {
+    return result.map(row =>
+        Object.fromEntries(
+            Object.entries(row).map(([key, value]) => [
+                key,
+                typeof value === "bigint" ? parseInt(value) : value
+            ])
+        )
+    );
+}

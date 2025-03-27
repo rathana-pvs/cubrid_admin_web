@@ -1,22 +1,28 @@
 import CUBRID from 'node-cubrid'
 
-export async function query(sql, param) {
-    const client = CUBRID.createCUBRIDConnection(
-        process.env.CUBRID_HOST,
-        process.env.CUBRID_PORT,
-        process.env.CUBRID_DATABASE,
-        process.env.CUBRID_USER,
-        process.env.CUBRID_PASSWORD
-    );
+
+
+export async function createConnection(param) {
+    const {host, port, database, user, password} = param;
+    const client = CUBRID.createConnection(host, port, user, password, database);
 
     try {
         await client.connect();
-        const [result] = await client.query(sql, param);
-        return result;
+        return client;
+    } catch (error) {
+        console.error('Database error:', error);
+        throw error;
+    }
+}
+
+export async function query(conn, sql, param) {
+
+    try {
+        return await conn.query(sql, param);
     } catch (error) {
         console.error('Database error:', error);
         throw error;
     } finally {
-        client.close();
+        conn.close();
     }
 }

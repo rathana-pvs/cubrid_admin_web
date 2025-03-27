@@ -4,19 +4,19 @@ import {Tree} from 'antd';
 import axios from "axios";
 import {setToken} from "@/utils/auth";
 import {useAppContext} from "@/context/AppContext";
-import {generalAPI, generateIdObject, getServerData, getSharedData, isNotEmpty} from "@/utils/utils";
-import TableMenu from "@/components/ui/menu/TableMenu";
+import {getDatabaseLogin} from "@/utils/utils";
 import {nanoid} from "nanoid";
 import {setLocalStorage} from "@/utils/storage";
 import Servers from "@/components/ui/contents/Servers";
 import Tables from "@/components/ui/contents/tables";
-import {info} from "sass";
+import ServerMenu from "@/components/ui/menu/TableMenu/ServerMenu";
+import Views from "@/components/ui/contents/views";
+import Serials from "@/components/ui/contents/serials";
+import Users from "@/components/ui/contents/users";
 
 
 function buildTree(...dataSets) {
     const map = new Map();
-
-    // Combine all items into a single map
     dataSets.flat().forEach(item => {
         map.set(item.key, { ...item, children: item.sub?item.sub:[] });
     });
@@ -36,55 +36,41 @@ const App = () => {
     const {state, dispatch} = useAppContext();
     const [menTable, setMenuTable] = useState({ x: 0, y: 0, open:false });
     const [isClient, setIsClient] = useState(false);
-
-    const handleContextMenu = ({event}) => {
-        setMenuTable({ x: event.clientX, y: event.clientY, open: true });
+    const [menu, setMenu] = useState({});
+    const handleContextMenu = (e) => {
+        const {event, node} = e
+        if(["server"].includes(node.type)){
+            setMenuTable({ x: event.clientX, y: event.clientY, open: true, node });
+            setMenu({...e, Screen: ServerMenu,  open: true});
+        }
     };
     useEffect(() => {
         setIsClient(true);
     }, []);
 
     const onSelect = async (selectedKeys, info) => {
-        if (info.node.type === "server"){
-            const checkObject = state.contents.find(item => item.label === info.node.title) || false;
-            if(checkObject){
-                dispatch({type: "PANEL_ACTIVE", payload: checkObject.key});
-            }else{
-                let key = nanoid(4);
-                dispatch({type: "CONTENTS", payload: [...state.contents, {label: info.node.title,
-                        children: <Servers/>,
-                        key: key}]})
-                dispatch({type: "PANEL_ACTIVE", payload: key})
+        const contents = [
+            {type: "server", children: <Servers/>},
+            {type: "tables", children: <Tables/>},
+            {type: "views", children: <Views/>},
+            {type: "serials", children: <Serials/>},
+            {type: "users", children: <Users/>},
+        ]
+        contents.forEach((res) => {
+            if(res.type === info.node.type) {
+                const checkObject = state.contents.find(item => item.label === info.node.title) || false;
+                if(checkObject){
+                    dispatch({type: "PANEL_ACTIVE", payload: checkObject.key});
+                }else{
+                    let key = nanoid(4);
+                    dispatch({type: "CONTENTS", payload: [...state.contents, {label: info.node.title,
+                            ...info.node,
+                            ...res,
+                            key: key}]})
+                    dispatch({type: "PANEL_ACTIVE", payload: key})
+                }
             }
-
-        }
-        else if(info.node.type === "database"){
-            dispatch({type: "LOGIN_DB_STATE", payload: true})
-            setLocalStorage("selectedDatabase",info.node.id )
-        }else if(info.node.type === "tables"){
-            const checkObject = state.contents.find(item => item.label === info.node.title) || false;
-            if(checkObject){
-                dispatch({type: "PANEL_ACTIVE", payload: checkObject.key});
-            }else{
-                let key = nanoid(4);
-                dispatch({type: "CONTENTS", payload: [...state.contents, {label: info.node.title,
-                        children: <Tables/>,
-                        key: key}]})
-                dispatch({type: "PANEL_ACTIVE", payload: key})
-            }
-        }else if(info.node.type === "users"){
-            const checkObject = state.contents.find(item => item.label === info.node.title) || false;
-            let key = ""
-            if(checkObject){
-                key = checkObject.key
-            }else{
-                dispatch({type: "CONTENTS", payload: [...state.contents, {label: info.node.title,
-                        children: `Content Users`,
-                        key: key}]})
-            }
-            dispatch({type: "PANEL_ACTIVE", payload: key})
-        }
-
+        })
     };
     const loadData = async (node) => {
 
@@ -93,7 +79,7 @@ const App = () => {
                 const token = await setToken({...node, id: node.username})
                 if (token) {
                     const newServerData = state.servers.map(res => {
-                        if(res.id === node.id){
+                        if(res.server_id === node.server_id){
                             res.token = token;
                         }
                         return res;
@@ -104,9 +90,8 @@ const App = () => {
                     const subServer = childData.map(item => {
                         const id = nanoid(8)
                         return {
-                            server_id: node.id,
-                            parentId: node.id,
-                            id: id,
+                            server_id: node.server_id,
+                            parentId: node.key,
                             type: item[0].toLowerCase(),
                             title: item[0],
                             key: id,
@@ -120,8 +105,8 @@ const App = () => {
 
             }
             case "databases":{
-                const serverData = state.servers.find(item => item.id === node.server_id)
-                const start_info = await axios.post("/api/start-info", {...serverData}).then(res=>res.data);
+                const server = state.servers.find(item => item.server_id === node.server_id)
+                const start_info = await axios.post("/api/start-info", {...server}).then(res=>res.data);
                 const activeList = start_info.activelist[0].active
                 const dbList = start_info.dblist[0].dbs
                 const deActiveList = dbList.filter(obj2 => !activeList.some(obj1 => obj1.dbname === obj2.dbname));
@@ -130,8 +115,7 @@ const App = () => {
                     const id = nanoid(8)
                     return {
                         server_id: node.server_id,
-                        id: id,
-                        parentId: node.id,
+                        parentId: node.key,
                         title: item.dbname,
                         key: id,
                         type: "database",
@@ -144,7 +128,7 @@ const App = () => {
             }
             case "database":{
                 const childData = [["Tables", "fa-table-tree"], ["Views", "fa-eye"],
-                    ["Serial", "fa-input-numeric"], ["Users", "fa-users"],
+                    ["Serials", "fa-input-numeric"], ["Users", "fa-users"],
                     ["Triggers", "fa-gears"], ["Synonyms", "fa-table-list"]]
 
                     const subDatabase = childData.map(item => {
@@ -157,7 +141,8 @@ const App = () => {
                             key: `${node.key}-${id}`,
                             type: item[0].toLowerCase(),
                             icon: <i className={`fa-light ${item[1]}`}/>,
-                            children: []
+                            children: [],
+                            isLeaf: false,
 
                         }
                     })
@@ -165,14 +150,15 @@ const App = () => {
                     break;
             }
             case "tables":{
-                const server = state.servers.find(item => item.id === node.server_id)
-                const database = state.databases.find(item => item.id === node.parentId)
+                const server = state.servers.find(item => item.server_id === node.server_id)
+                const database = state.databases.find(item => item.key === node.parentId)
+                const database_login = getDatabaseLogin(server, database)
+
                 let allClass = []
 
-                const classes = await axios.post("/api/class-info",
-                    {...server, dbname: database.title})
+                const {result} = await axios.post("/api/list-tables", {database_login})
                     .then(res => res.data);
-                const [tables, views] = getTableOrView(classes);
+
                 const systemId = nanoid(8)
                 allClass.push({
                     server_id: node.server_id,
@@ -181,26 +167,28 @@ const App = () => {
                     key: `${node.key}-${systemId}`,
                     type: "system-table",
                     icon: <i className="fa-light fa-folder"/>,
-                    sub: tables[0].map((item) => ({
+                    sub: result.filter(res=>res.is_system_class === "YES").map((item) => ({
                             server_id: node.server_id,
                             database_id: node.parentId,
                             parentId: node.key,
-                            title: item.classname,
+                            title: item.class_name,
                             key: `${node.key}-${nanoid(8)}`,
                             type: "table",
                             icon: <i className="fa-light fa-table"/>,
                             isLeaf: true,
+                            ...item
                     })),
                 })
-                tables[1].forEach(res=>{
+                result.filter(res=>res.is_system_class === "NO").forEach(item=>{
                         allClass.push({
                             server_id: node.server_id,
                             database_id: node.parentId,
                             parentId: node.key,
-                            title: res.classname,
+                            title: `${item.owner_name}.${item.class_name}`,
                             key: `${node.key}-${nanoid(8)}`,
                             type: "table",
-                            icon: <i className="fa-light fa-table"/>
+                            icon: <i className="fa-light fa-table"/>,
+                            ...item
                         })
                 })
 
@@ -210,14 +198,13 @@ const App = () => {
                 break;
             }
             case "views":{
-                const server = state.servers.find(item => item.id === node.server_id)
-                const database = state.databases.find(item => item.id === node.parentId)
+                const server = state.servers.find(item => item.server_id === node.server_id)
+                const database = state.databases.find(item => item.key === node.parentId)
+                const database_login = getDatabaseLogin(server, database)
                 let allView = []
 
-                const classes = await axios.post("/api/class-info",
-                    {...server, dbname: database.title})
+                const {result} = await axios.post("/api/list-views", {database_login})
                     .then(res => res.data);
-                const [tables, views] = getTableOrView(classes);
                 const viewId = nanoid(8)
                 allView.push({
                     server_id: node.server_id,
@@ -226,92 +213,145 @@ const App = () => {
                     key: `${node.key}-${viewId}`,
                     type: "system-view",
                     icon: <i className="fa-light fa-folder"/>,
-                    sub: views[0].map((item) => ({
+                    sub: result.filter(res=>res.is_system_class === "YES").map((item) => ({
                         server_id: node.server_id,
                         parentId: `${node.key}-${viewId}`,
                         id: nanoid(8),
-                        title: item.classname,
+                        title: item.class_name,
                         key: `${node.key}-${viewId}-${nanoid(8)}`,
                         type: "system-view",
-                        icon: <i className="fa-light fa-eye"/>
+                        icon: <i className="fa-light fa-eye"/>,
+                        isLeaf: true,
+                        ...item
                     })),
                 })
-                views[1].forEach(res=>{
+                result.filter(res=>res.is_system_class === "NO").forEach(item=>{
                         allView.push({
                             server_id: node.server_id,
                             database_id: node.parentId,
                             parentId: node.key,
-                            title: res.classname,
+                            title: `${item.owner_name}.${item.class_name}`,
                             key: `${node.key}-${nanoid(8)}`,
                             type: "view",
-                            icon: <i className="fa-light fa-eye"/>
+                            icon: <i className="fa-light fa-eye"/>,
+                            ...item
                         })
                 })
                 dispatch({type: "VIEWS", payload: [...state.views, ...allView]})
                 break
             }
-            case "serial":{
+            case "serials":{
+                const server = state.servers.find(item => item.server_id === node.server_id)
+                const database = state.databases.find(item => item.key === node.parentId)
+                const database_login = getDatabaseLogin(server, database)
+                const {result} = await axios.post("/api/list-serials", {database_login})
+                    .then(res => res.data);
+                const serialData = result.map(item => {
+                    return {
+                        server_id: node.server_id,
+                        database_id: node.parentId,
+                        parentId: node.key,
+                        title: `${item.owner_name}.${item.name}`,
+                        key: `${node.key}-${nanoid(8)}`,
+                        type: "serial",
+                        icon: <i className="fa-light fa-list-ol"/>,
+                        isLeaf: true,
+                        ...item
+                    }
+                })
+                dispatch({type: "SERIALS", payload: [...state.serials, ...serialData]})
                 break
             }
             case "users":{
-                const server = state.servers.find(item => item.id === node.server_id)
-                const database = state.databases.find(item => item.id === node.parentId)
-                const userInfo = await axios.post("/api/general", {task: "userinfo", dbname: database.title, ...server}).then(res => res.data)
-                const newUser = userInfo.user.map(res=>{
+                const server = state.servers.find(item => item.server_id === node.server_id)
+                const database = state.databases.find(item => item.key === node.parentId)
+                const database_login = getDatabaseLogin(server, database)
+                const {result} = await axios.post("/api/list-users", {database_login})
+                    .then(res => res.data);
+                const newUser = result.map(item=>{
                     return {
                         server_id: node.server_id,
                         parentId: node.key,
-                        title: res["@name"],
+                        title: item.name,
                         key: `${node.key}-${nanoid(8)}`,
                         type: "user",
                         icon: <i className="fa-light fa-user"/>,
+                        isLeaf: true,
+                        ...item
                     }
                 })
                 dispatch({type: "USERS", payload: [...state.users, ...newUser]})
                 break
             }
             case "triggers":{
-                const server = state.servers.find(item => item.id === node.server_id)
-                const database = state.databases.find(item => item.id === node.parentId)
-                const triggerInfo = await axios.post("/api/general",
-                    {task: "gettriggerinfo", dbname: database.title, ...server}).
-                then(res => res.data)
-                const newTrigger = triggerInfo.triggerlist[0].triggerinfo.map(res=>{
+                const server = state.servers.find(item => item.server_id === node.server_id)
+                const database = state.databases.find(item => item.key === node.parentId)
+                const database_login = getDatabaseLogin(server, database)
+                const {result} = await axios.post("/api/list-triggers", {database_login})
+                    .then(res => res.data);
+                const newTrigger = result.map(item=>{
                     return {
                         server_id: node.server_id,
                         parentId: node.key,
-                        title: res["name"],
+                        title: `${item.owner_name}.${item.trigger_name}`,
                         key: `${node.key}-${nanoid(8)}`,
                         type: "trigger",
                         icon: <i className="fa-light fa-gear-code"></i>,
-                        ...res
+                        isLeaf: true,
+                        ...item
                     }
                 })
                 dispatch({type: "TRIGGERS", payload: [...state.triggers, ...newTrigger]})
                 break
             }
+            case "synonyms":{
+                const server = state.servers.find(item => item.server_id === node.server_id)
+                const database = state.databases.find(item => item.key === node.parentId)
+                const database_login = getDatabaseLogin(server, database)
+                const {result} = await axios.post("/api/list-synonyms", {database_login})
+                    .then(res => res.data);
+                const newSynonym = result.map(item=>{
+                    return {
+                        server_id: node.server_id,
+                        parentId: node.key,
+                        title: `${item.synonym_owner_name}.${item.synonym_name}`,
+                        key: `${node.key}-${nanoid(8)}`,
+                        type: "synonym",
+                        icon: <i className="fa-light fa-gear-code"></i>,
+                        isLeaf: true,
+                        ...item
+                    }
+                })
+                dispatch({type: "SYNONYMS", payload: [...state.synonyms, ...newSynonym]})
+                break
+            }
             case "table":{
-
-                const server = state.servers.find(item => item.id === node.server_id)
-                const database = state.databases.find(item => item.id === node.database_id)
-                const columns = await axios.post("/api/general",
-                    {task: "class", dbname: database.title, classname: node.title, ...server})
+                const server = state.servers.find(item => item.server_id === node.server_id)
+                const database = state.databases.find(item => item.key === node.database_id)
+                const database_login = getDatabaseLogin(server, database)
+                const table = node.title.split(".")
+                const columns = await axios.post("/api/column-info",
+                    {database_login, owner: table[0], table:table[1]})
                     .then(res => res.data)
-                const {attribute, constraint} = columns.classinfo[0]
+                const indexes = await axios.post("/api/index-info",
+                    {database_login, owner: table[0], table:table[1]})
+                    .then(res => res.data)
                 let columnIndex = []
                 columnIndex.push({
                     parentId: node.key,
                     title: "Columns",
                     key: nanoid(8),
                     icon: <i className="fa-light fa-folder"/>,
-                    sub: attribute.map(res=>({
+                    sub: columns.result.map(item=>({
                         server_id: node.server_id,
                         database_id: node.database_id,
                         parentId: node.key,
                         key: `${node.key}-${nanoid(8)}`,
-                        title: res["name"],
+                        title: item.attr_name,
                         type: "column",
-                        icon: <i className="fa-light fa-columns-3"></i>
+                        icon: <i className="fa-light fa-columns-3"/>,
+                        isLeaf: true,
+                        ...item
                     }))
                 })
 
@@ -320,17 +360,18 @@ const App = () => {
                     title: "Indexes",
                     key: nanoid(8),
                     icon: <i className="fa-light fa-folder"/>,
-                    sub: constraint?.map(res=>({
+                    sub: indexes.result.map(item=>({
                         server_id: node.server_id,
                         database_id: node.database_id,
                         parentId: node.key,
                         key: `${node.key}-${nanoid(8)}`,
-                        title: res["name"],
+                        title: item.index_name,
                         type: "index",
-                        icon: <i className="fa-light fa-columns-3"></i>
+                        icon: <i className="fa-light fa-columns-3"/>,
+                        isLeaf: true,
+                        ...item
                     }))
                 })
-                console.log(columnIndex)
                 dispatch({type: "COLUMNS", payload: [...state.columns, ...columnIndex]})
                 break
             }
@@ -340,45 +381,19 @@ const App = () => {
     }
 
 
-    const getTableOrView = (classes) => {
-
-        const {systemclass, userclass} = classes;
-        let systemTables = []
-        let userTables = []
-        let systemViews = []
-        let userViews = []
-        if (isNotEmpty(systemclass)) {
-            systemclass[0].class.forEach(item => {
-                item.type = "system";
-                if (item.virtual === "view") {
-                    systemViews.push(item)
-                } else {
-                    systemTables.push(item)
-                }
-            })
+    const renderManu = ()=>{
+        const {Screen, open, ...e} = menu
+        if(Screen){
+            return <Screen {...e} open={open} onClose={()=>setMenu({...menu, open: false})}/>
         }
-
-        if (isNotEmpty(userclass)) {
-
-            userclass[0].class.forEach(item => {
-                item.type = "user";
-                if (item.virtual === "view") {
-                    userViews.push(item)
-                } else {
-                    userTables.push(item)
-                }
-            })
-        }
-
-        return [[systemTables, userTables], [systemViews, userViews]];
+        return null
 
     }
-
 
     if (!isClient) return null;
     return (
             <div>
-                <TableMenu {...menTable}/>
+                {renderManu()}
                 <Tree
                     onRightClick={handleContextMenu}
                     showLine
@@ -387,12 +402,10 @@ const App = () => {
                     onSelect={onSelect}
                     treeData={buildTree(state.servers, state.sub_server,
                         state.databases, state.sub_database, state.tables,
-                        state.views, state.users, state.triggers, state.columns)}
+                        state.views, state.serials, state.users, state.triggers,
+                        state.synonyms, state.columns)}
                 />
             </div>
-
-
-
     );
 };
 export default App;
