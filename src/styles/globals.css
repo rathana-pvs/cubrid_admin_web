@@ -189,3 +189,12 @@ body {
             color-mix(in srgb, var(--primary-color) 10%, transparent) !important;
 }
 
+.content__column .ant-select-item{
+    font-size: 12px !important;
+}
+
+.custom-tabs .ant-tabs-nav-list {
+    width: 120px !important;
+    text-align: left;/* Prevents width change when adding border */
+    border: none !important;
+}

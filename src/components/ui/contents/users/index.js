@@ -1,4 +1,4 @@
-import {Dropdown, List, Menu, Table, Tabs} from "antd";
+import {Dropdown, List, Menu, Skeleton, Table, Tabs} from "antd";
 import React, {useEffect, useState} from "react";
 import {nanoid} from "nanoid";
 import styles from "./Users.module.css";
@@ -17,20 +17,31 @@ import {
 
 
 const columns = [
-    { title: "Owner", dataIndex: "owner_name", key: "1"},
-    { title: "View", dataIndex: "class_name", key: "2" },
-    { title: "Query Specific", dataIndex: "query", ellipsis: true, key: "3",
-        render: (text, record) => ({
-            children: text,
-            props: { colSpan: 3 }, // Merge with next column
-        }),
-    }
+    { title: "Table", dataIndex: "class_name", key: "1", width: 100 },
+    { title: "Owner", dataIndex: "owner_name", key: "2", width: 100 },
+    { title: "Select", dataIndex: "select", key: "3" },
+    { title: "Insert", dataIndex: "class_name", key: "1"},
+    { title: "Update", dataIndex: "owner_name", key: "2" },
+    { title: "Delete", dataIndex: "select", key: "3" },
+    { title: "Alter", dataIndex: "class_name", key: "1"},
+    { title: "Index", dataIndex: "owner_name", key: "2" },
+    { title: "Execute", dataIndex: "select", key: "3" },
+    { title: "Grant Select", dataIndex: "select", key: "3" },
+    { title: "Grant Insert", dataIndex: "class_name", key: "1"},
+    { title: "Grant Update", dataIndex: "owner_name", key: "2" },
+    { title: "Grant Delete", dataIndex: "select", key: "3" },
+    { title: "Grant Alter", dataIndex: "class_name", key: "1"},
+    { title: "Grant Index", dataIndex: "owner_name", key: "2" },
+    { title: "Grant Execute", dataIndex: "select", key: "3" },
 ];
 export default function () {
     const {state, dispatch} = useAppContext();
     const [users, setUsers] = useState([]);
     const [listTables, setListTables] = useState([]);
     const [taps, setTaps] = useState([]);
+    const [selectedUser, setSelectedUser] = useState({});
+    const [loadingUser, setLoadingUser] = useState(true);
+    const [loadingPermission, setLoadingPermission] = useState(false);
     const [activeKey, setActiveKey] = useState("table1");
     const onChange = (key) => {
         setActiveKey(key)
@@ -77,6 +88,7 @@ export default function () {
         const database_login = getDatabaseLogin(server, database)
         const users = await axios.post("/api/list-users",{database_login})
             .then(res => res.data);
+        setLoadingUser(false);
         if(users.success) {
             const userData = users.result.map((res, index) => {
                 if(index === 0) {
@@ -101,24 +113,41 @@ export default function () {
 
     return (
         <div className={styles.user__layout}>
-            <div className={styles.user__list}>
-                <List
-                    dataSource={users}
-                    renderItem={(item) => (
-                        <List.Item style={{ cursor: "pointer", padding: "6px 8px", borderBottom: "1px solid #ddd", }}>
-                            {item.icon} <span style={{ marginLeft: 8, fontWeight: 500 }}>{item.text}</span>
-                        </List.Item>
-                    )}
-                />
-            </div>
-            <div>
-                <Table dataSource={listTables} columns={columns} pagination={false}
-                       bordered
-                       onRow={(record) => ({
-                           onDoubleClick: ()=>onAdd(record),
-                       })}
-                />
-            </div>
+
+                {loadingUser?
+                    <div style={{ width: 200 }}>
+                        <Skeleton active />
+                    </div>
+                    :
+                    <div className={styles.user__list}>
+                        <List
+                            dataSource={users}
+                            renderItem={(item) => (
+                                <List.Item className={`${styles.user__list__item} ${selectedUser.key === item.key? styles.item__selected: ""}`}
+                                           onClick={()=>setSelectedUser(item)}>
+                                    {item.icon} <span style={{ marginLeft: 8, fontWeight: 500 }}>{item.text}</span>
+                                </List.Item>
+                            )}
+                        />
+                    </div>
+                }
+            {loadingUser?
+                <Skeleton active />:
+                <div style={{ overflowX: "auto"}}>
+                    <Table dataSource={listTables} columns={columns} pagination={false}
+                           bordered
+                           loading={loadingPermission}
+                           style={{ height: "100%", width: "100%" }}
+                           onRow={(record) => ({
+                               onDoubleClick: ()=>onAdd(record),
+                           })}
+                           scroll={{ x: "max-content" }}
+                    />
+                </div>
+
+            }
+
+
         </div>
     )
 }

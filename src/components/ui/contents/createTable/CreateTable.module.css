@@ -1,0 +1,52 @@
+.layout{
+    display: flex;
+    flex-direction: column;
+    /*gap: 24px;*/
+}
+.general{
+    width: 100%;
+}
+
+.section__layout{
+    display: flex;
+    flex-direction: row;
+    gap: 16px;
+}
+
+/*.feature{*/
+/*    width: 200px;*/
+/*}*/
+.content{
+    width: 100%;
+}
+.divider{
+    margin: 16px 0 !important;
+}
+.feature__item{
+    cursor: pointer;
+    font-weight: 500;
+}
+.feature__item:hover{
+    background-color: rgb(44, 62, 80, 0.05);
+    transition: background-color 0.2s;
+}
+.item__selected{
+    background-color: rgb(44, 62, 80, 0.15) !important;
+}
+
+.table__td{
+    padding: 0 !important;
+    font-size: 12px;
+    font-weight: normal !important;
+}
+.table__input{
+    border: none;
+    border-radius: 0;
+    height: 28px;
+}
+.table__checkbox{
+    text-align: center;
+}
+.table__input:focus{
+    box-shadow: 0 0 0 1px rgb(44, 62, 80, 0.48) !important;
+}

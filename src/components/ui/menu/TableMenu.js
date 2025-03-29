@@ -1,7 +1,12 @@
-import {Dropdown, Menu} from "antd";
-import {getMenuData} from "@/components/ui/menu/TableMenu/menuData";
-import {useEffect, useState} from "react";
-import {ApiOutlined, DeleteOutlined, EditOutlined, PlusOutlined} from "@ant-design/icons";
+import {Dropdown} from "antd";
+import {
+    ApiOutlined,
+    DeleteOutlined,
+    DownloadOutlined,
+    EditOutlined, FileExcelOutlined, PicRightOutlined,
+    PlusOutlined,
+    UploadOutlined
+} from "@ant-design/icons";
 import {nanoid} from "nanoid";
 import {useAppContext} from "@/context/AppContext";
 import {setLocalStorage} from "@/utils/storage";
@@ -11,29 +16,40 @@ export default function({node, event, open, onClose}) {
     const {clientX, clientY} = event;
     const menuItems = [
         {
-            label: "Disconnect Host",
-            key: nanoid(4),
-            icon: <ApiOutlined />,
-        },
-        {
-            label: "Add Host",
+            label: "Create Java File",
             key: nanoid(4),
             icon: <PlusOutlined />,
-            onClick:()=>dispatch({type:"CONNECTION", payload:{type: "add", open:true}})
         },
         {
-            label: 'Edit Host',
+            label: "Create PHP File",
+            key: nanoid(4),
+            icon: <PlusOutlined />,
+        },
+        {
+            label: "Excel Export",
+            key: nanoid(4),
+            icon: <FileExcelOutlined />,
+            disabled: true,
+        },
+        {
+            label: "Export",
+            key: nanoid(4),
+            icon: <UploadOutlined />,
+        },
+        {
+            label: "Import",
+            key: nanoid(4),
+            icon: <DownloadOutlined />,
+        },
+        {
+            label: "Edit Table",
             key: nanoid(4),
             icon: <EditOutlined />,
-            onClick:()=>dispatch({type:"CONNECTION", payload:{server_id: node.server_id, type: "edit", open:true}})
-
         },
         {
-            label: 'Delete Host',
+            label: "Rename Table",
             key: nanoid(4),
-            icon: <DeleteOutlined style={{color: 'var(--danger-color)'}} />,
-            onClick: ()=> onDelete()
-
+            icon: <PicRightOutlined />,
         },
     ]
 
@@ -43,7 +59,7 @@ export default function({node, event, open, onClose}) {
         dispatch({type: "SERVERS", payload: connections});
     }
     return (
-        <Dropdown overlayStyle={{minWidth: 250}}  menu={{items: menuItems}}
+        <Dropdown overlayStyle={{minWidth: 200}}  menu={{items: menuItems}}
                   trigger={["contextMenu"]}
                   onOpenChange={onClose}
                   open={open} placement="bottomLeft">

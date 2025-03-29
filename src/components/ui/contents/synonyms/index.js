@@ -1,4 +1,4 @@
-import {Table, Tabs} from "antd";
+import {Table} from "antd";
 import React, {useEffect, useState} from "react";
 import {nanoid} from "nanoid";
 import styles from "../Contents.module.css";
@@ -8,28 +8,28 @@ import {getDatabaseLogin} from "@/utils/utils";
 
 
 const columns = [
-    { title: "Owner", dataIndex: "owner_name", key: "1"},
-    { title: "Name", dataIndex: "name", key: "2" },
-    { title: "Current Value", dataIndex: "current_val", key: "3"},
-    { title: "Increment Value", dataIndex: "increment_val", key: "4"},
-    { title: "Min Value", dataIndex: "min_val", key: "5" },
-    { title: "Max Value", dataIndex: "max_val", key: "6"},
-    { title: "Cache Number", dataIndex: "cached_num", key: "7" },
-    { title: "Cycle", dataIndex: "cyclic", key: "8"}
+    { title: "Owner", dataIndex: "synonym_owner_name", key: "1"},
+    { title: "Name", dataIndex: "synonym_name", key: "2" },
+    { title: "Target Owner", dataIndex: "target_owner_name", ellipsis: true, key: "3"},
+    { title: "Target Name", dataIndex: "target_name", ellipsis: true, key: "4" },
+    { title: "Comment", dataIndex: "comment", ellipsis: true, key: "5" },
 ];
+
+
 export default function () {
     const {state, dispatch} = useAppContext();
     const [listTables, setListTables] = useState([]);
     const [loading, setLoading] = useState(true);
-    async function getSerialsInfo() {
+    async function getSynonymsInfo() {
         const content = state.contents.find(res => res.key === state.panel_active)
         const server = state.servers.find(res => res.key === content.server_id)
         const database = state.databases.find(res => res.key === content.parentId);
-        const serials = await axios.post("/api/list-serials",{database_login: getDatabaseLogin(server, database)})
+        const database_login = getDatabaseLogin(server, database)
+        const synonyms = await axios.post("/api/list-synonyms",{database_login})
             .then(res => res.data);
         setLoading(false);
-        if (serials.success) {
-            const tableData = serials.result.map(item => {
+        if (synonyms.success) {
+            const tableData = synonyms.result.map(item => {
                 item.key = nanoid(8)
                 return item
             })
@@ -37,7 +37,7 @@ export default function () {
         }
     }
     useEffect(() => {
-        getSerialsInfo()
+        getSynonymsInfo()
 
     },[])
 

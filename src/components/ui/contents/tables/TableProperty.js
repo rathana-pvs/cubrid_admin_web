@@ -16,6 +16,7 @@ const columns = [
 export default function ({record}) {
     const {state, dispatch} = useAppContext();
     const [data, setData] = useState([]);
+    const [loading, setLoading] = useState(true);
 
     async function getColumns() {
         const server = state.servers.find(item => item.id === record.server_id)
@@ -31,7 +32,7 @@ export default function ({record}) {
         const serial = await axios.post("/api/serial-info",
             {database_login, owner: table[0], table: table[1]})
             .then(res => res.data)
-        console.log(columns, indexes, serial)
+        setLoading(false);
         const columnData = columns.result.map(item => {
             const auto_increment = serial.result.find(res => res.att_name === item.attr_name) || false
             const unique = indexes.result.find(res=>res)
@@ -49,6 +50,7 @@ export default function ({record}) {
         getColumns()
     },[])
     return <Table dataSource={data} columns={columns} pagination={false}
+                  loading={loading}
                   bordered
     />
 }

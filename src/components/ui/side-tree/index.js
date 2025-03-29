@@ -5,7 +5,7 @@ import axios from "axios";
 import {setToken} from "@/utils/auth";
 import {useAppContext} from "@/context/AppContext";
 import {generalAPI, generateIdObject, getServerData, getSharedData, isNotEmpty} from "@/utils/utils";
-import TableMenu from "@/components/ui/menu/TableMenu/ServerMenu";
+import TableMenu from "@/components/ui/menu/ServerMenu";
 import {nanoid} from "nanoid";
 import {setLocalStorage} from "@/utils/storage";
 import Servers from "@/components/ui/contents/Servers";

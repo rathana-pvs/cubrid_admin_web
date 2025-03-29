@@ -22,8 +22,9 @@ const columns = [
 export default function () {
     const {state, dispatch} = useAppContext();
     const [listTables, setListTables] = useState([]);
+    const [loading, setLoading] = useState(true);
     const [taps, setTaps] = useState([]);
-    const [activeKey, setActiveKey] = useState("table1");
+    const [activeKey, setActiveKey] = useState("");
     const onChange = (key) => {
         setActiveKey(key)
     };
@@ -65,6 +66,7 @@ export default function () {
         const database = state.databases.find(res => res.key === content.parentId);
         const tablesInfo = await axios.post("/api/tables-info",{database_login: getDatabaseLogin(server, database)})
             .then(res => res.data);
+        setLoading(false);
         if (tablesInfo.success) {
             const tableData = tablesInfo.result.map((obj, index) => {
                 obj["key"] = nanoid(8)
@@ -93,6 +95,7 @@ export default function () {
         <div className={styles.tables}>
             <div>
                 <Table dataSource={listTables} columns={columns} pagination={false}
+                       loading={loading}
                        bordered
                        onRow={(record) => ({
                            onDoubleClick: ()=>onAdd(record),

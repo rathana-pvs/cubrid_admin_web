@@ -1,4 +1,4 @@
-import {Table, Tabs} from "antd";
+import {Empty, Table, Tabs} from "antd";
 import React, {useEffect, useState} from "react";
 import {nanoid} from "nanoid";
 import styles from "../Contents.module.css";
@@ -20,7 +20,8 @@ const columns = [
 ];
 export default function () {
     const {state, dispatch} = useAppContext();
-    const [listTables, setListTables] = useState([]);
+    const [listTables, setListTables] = useState([])
+    const [loading, setLoading] = useState(true)
     const [taps, setTaps] = useState([]);
     const [activeKey, setActiveKey] = useState("table1");
     const onChange = (key) => {
@@ -64,6 +65,7 @@ export default function () {
         const database = state.databases.find(res => res.key === content.parentId);
         const views = await axios.post("/api/list-views",{database_login: getDatabaseLogin(server, database)})
             .then(res => res.data);
+        setLoading(false);
         if (views.success) {
             const tableData = views.result.filter(res=>res.is_system_class === "NO").map(item => {
                 item.query = item.vclass_def
@@ -83,9 +85,29 @@ export default function () {
             <div>
                 <Table dataSource={listTables} columns={columns} pagination={false}
                        bordered
+                       loading={loading}
+                       rowClassName={() => "hover-row"}
                        onRow={(record) => ({
                            onDoubleClick: ()=>onAdd(record),
                        })}
+                       components={{
+                           body: {
+                               wrapper: ({ children, ...props }) => {
+                                   if (listTables.length === 0) {
+                                       return (
+                                           <tbody {...props}>
+                                           <tr>
+                                               <td colSpan={5} style={{ textAlign: "center", padding: "20px" }}>
+                                                   <Empty />;
+                                               </td>
+                                           </tr>
+                                           </tbody>
+                                       );
+                                   }
+                                   return <tbody {...props}>{children}</tbody>;
+                               },
+                           },
+                       }}
                 />
             </div>
             <div>

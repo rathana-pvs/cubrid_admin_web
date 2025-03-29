@@ -9,10 +9,19 @@ import {nanoid} from "nanoid";
 import {setLocalStorage} from "@/utils/storage";
 import Servers from "@/components/ui/contents/Servers";
 import Tables from "@/components/ui/contents/tables";
-import ServerMenu from "@/components/ui/menu/TableMenu/ServerMenu";
+import ServerMenu from "@/components/ui/menu/ServerMenu";
 import Views from "@/components/ui/contents/views";
 import Serials from "@/components/ui/contents/serials";
 import Users from "@/components/ui/contents/users";
+import Triggers from "@/components/ui/contents/triggers";
+import Synonyms from "@/components/ui/contents/synonyms";
+import TableMenu from "@/components/ui/menu/TableMenu";
+import TablesMenu from "@/components/ui/menu/TablesMenu";
+import ViewsMenu from "@/components/ui/menu/ViewsMenu";
+import SerialsMenu from "@/components/ui/menu/SerialsMenu";
+import UsersMenu from "@/components/ui/menu/UsersMenu";
+import TriggersMenu from "@/components/ui/menu/TriggersMenu";
+import SynonymsMenu from "@/components/ui/menu/SynonymsMenu";
 
 
 function buildTree(...dataSets) {
@@ -34,15 +43,25 @@ function buildTree(...dataSets) {
 
 const App = () => {
     const {state, dispatch} = useAppContext();
-    const [menTable, setMenuTable] = useState({ x: 0, y: 0, open:false });
     const [isClient, setIsClient] = useState(false);
     const [menu, setMenu] = useState({});
     const handleContextMenu = (e) => {
-        const {event, node} = e
-        if(["server"].includes(node.type)){
-            setMenuTable({ x: event.clientX, y: event.clientY, open: true, node });
-            setMenu({...e, Screen: ServerMenu,  open: true});
-        }
+        const {node} = e
+        const menus = [
+            {type: "server", Screen: ServerMenu},
+            {type: "tables", Screen: TablesMenu},
+            {type: "views", Screen: ViewsMenu},
+            {type: "serials", Screen: SerialsMenu},
+            {type: "users", Screen: UsersMenu},
+            {type: "triggers", Screen: TriggersMenu},
+            {type: "synonyms", Screen: SynonymsMenu},
+            {type: "table", Screen: TableMenu}
+        ]
+        menus.forEach((item) => {
+            if(item.type === node.type){
+                setMenu({...e, Screen: item.Screen,  open: true});
+            }
+        })
     };
     useEffect(() => {
         setIsClient(true);
@@ -55,6 +74,8 @@ const App = () => {
             {type: "views", children: <Views/>},
             {type: "serials", children: <Serials/>},
             {type: "users", children: <Users/>},
+            {type: "triggers", children: <Triggers/>},
+            {type: "synonyms", children: <Synonyms/>}
         ]
         contents.forEach((res) => {
             if(res.type === info.node.type) {
