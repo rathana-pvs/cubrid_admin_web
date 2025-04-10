@@ -11,9 +11,8 @@ import {nanoid} from "nanoid";
 import {useAppContext} from "@/context/AppContext";
 import Synonyms from "@/components/ui/contents/synonyms";
 import React from "react";
-import CreateTable from "@/components/ui/contents/createTable";
+import CreateTable from "@/components/ui/contents/create-table";
 
-const tableName = "NewTable"
 
 export default function({node, event, open, onClose}) {
     const {state, dispatch} = useAppContext();

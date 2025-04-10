@@ -1,9 +1,9 @@
 import React from 'react';
 import { CaretRightOutlined } from '@ant-design/icons';
 import { Collapse, theme } from 'antd';
-import DatabaseVolumes from "@/components/ui/contents/database-volumes/DatabaseVolumes";
-import Brokers from "@/components/ui/contents/brokers/Brokers";
-import SystemStatus from "@/components/ui/contents/system-status/SystemStatus";
+import DatabaseVolumes from "@/components/ui/contents/servers/DatabaseVolumes";
+import Brokers from "@/components/ui/contents/servers/Brokers";
+import SystemStatus from "@/components/ui/contents/servers/SystemStatus";
 
 const getItems = (panelStyle) => [
     {
@@ -37,7 +37,7 @@ const getItems = (panelStyle) => [
         style: panelStyle,
     },
 ];
-const Servers = () => {
+const Index = () => {
     const { token } = theme.useToken();
     const panelStyle = {
         marginBottom: 8,
@@ -57,4 +57,4 @@ const Servers = () => {
         />
     );
 };
-export default Servers;
+export default Index;

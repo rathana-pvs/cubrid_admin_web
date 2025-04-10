@@ -249,7 +249,7 @@ export default function () {
                         <Col span={24}>
                             <Form.Item
                                 labelCol={{span: 5}}
-                                label="Broker IP"
+                                label="Brokers IP"
                                 name="broker_ip"
                             >
                                 <Input defaultValue={"localhost"}/>
@@ -258,7 +258,7 @@ export default function () {
                         <Col span={24}>
                             <Form.Item
                                 labelCol={{span: 5}}
-                                label="Broker Port"
+                                label="Brokers Port"
                                 name="broker_port"
                             >
                                 <AutoComplete

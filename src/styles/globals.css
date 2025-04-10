@@ -193,8 +193,20 @@ body {
     font-size: 12px !important;
 }
 
-.custom-tabs .ant-tabs-nav-list {
+.create__table .ant-tabs-nav-list {
     width: 120px !important;
     text-align: left;/* Prevents width change when adding border */
     border: none !important;
 }
+
+.create__table .ant-tabs-content-holder {
+    height: 100% !important;
+}
+
+.create__table .ant-tabs-content {
+    height: 100%;
+}
+.create__table .ant-tabs-tabpane{
+    height: 100%;
+}
+

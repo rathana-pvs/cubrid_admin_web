@@ -96,3 +96,6 @@ th.ant-table-cell{
 /*    background-color: color-mix(in srgb, var(--primary-color) 15%, transparent) !important;*/
 /*    color: var(--primary-color) !important;*/
 /*}*/
+.ant-tabs-left{
+    width: 100% !important;
+}

@@ -9,6 +9,7 @@ export const initialState = {
     contents: [],
     panel_active: "",
     databases: [],
+    brokers: [],
     sub_server: [],
     sub_database: [],
     tables:[],
@@ -44,6 +45,8 @@ export const appReducer = (state, action) => {
             return { ...state, databases: action.payload };
         case "SUB_DATABASE":
             return { ...state, sub_database: action.payload };
+        case "BROKERS":
+            return { ...state, brokers: action.payload };
         case "TABLES":
             return { ...state, tables: action.payload };
         case "VIEWS":

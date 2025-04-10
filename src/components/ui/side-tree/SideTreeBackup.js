@@ -6,8 +6,6 @@ import {setToken} from "@/utils/auth";
 import {useAppContext} from "@/context/AppContext";
 import {getDatabaseLogin} from "@/utils/utils";
 import {nanoid} from "nanoid";
-import {setLocalStorage} from "@/utils/storage";
-import Servers from "@/components/ui/contents/Servers";
 import Tables from "@/components/ui/contents/tables";
 import ServerMenu from "@/components/ui/menu/ServerMenu";
 import Views from "@/components/ui/contents/views";
@@ -22,6 +20,10 @@ import SerialsMenu from "@/components/ui/menu/SerialsMenu";
 import UsersMenu from "@/components/ui/menu/UsersMenu";
 import TriggersMenu from "@/components/ui/menu/TriggersMenu";
 import SynonymsMenu from "@/components/ui/menu/SynonymsMenu";
+import Servers from "@/components/ui/contents/servers";
+import Brokers from "@/components/ui/contents/brokers";
+import Broker from "@/components/ui/contents/brokers/broker"
+import {info} from "sass";
 
 
 function buildTree(...dataSets) {
@@ -70,6 +72,8 @@ const App = () => {
     const onSelect = async (selectedKeys, info) => {
         const contents = [
             {type: "server", children: <Servers/>},
+            {type: "brokers", children: <Brokers/>},
+            {type: "broker", children: <Broker/>},
             {type: "tables", children: <Tables/>},
             {type: "views", children: <Views/>},
             {type: "serials", children: <Serials/>},
@@ -146,6 +150,33 @@ const App = () => {
 
                 dispatch({type: "DATABASES", payload: [...state.databases, ...newDatabases]});
                 break;
+            }
+            case "brokers": {
+                const server = state.servers.find(item => item.server_id === node.server_id)
+                const result = await axios.post("/api/general",
+                    {task: "getbrokersinfo", ...server}).then(res=>res.data);
+                if(result.status === "success"){
+
+                    const broker_info = result.brokersinfo[0].broker
+
+                    if(broker_info){
+                        const newBrokers = broker_info.map(item => {
+                            return {
+                                server_id: node.server_id,
+                                parentId: node.key,
+                                title: `${item.name} (${item.port},${item.access_mode})`,
+                                key: nanoid(8),
+                                type: "broker",
+                                icon: <i className="fa-light fa-folder-gear"></i>,
+                                data: item
+
+                            }
+                        })
+                        dispatch({type: "BROKERS", payload: [...state.brokers, ...newBrokers]});
+                    }
+                }
+
+                break
             }
             case "database":{
                 const childData = [["Tables", "fa-table-tree"], ["Views", "fa-eye"],
@@ -422,7 +453,7 @@ const App = () => {
                     loadData={loadData}
                     onSelect={onSelect}
                     treeData={buildTree(state.servers, state.sub_server,
-                        state.databases, state.sub_database, state.tables,
+                        state.databases, state.brokers, state.sub_database, state.tables,
                         state.views, state.serials, state.users, state.triggers,
                         state.synonyms, state.columns)}
                 />

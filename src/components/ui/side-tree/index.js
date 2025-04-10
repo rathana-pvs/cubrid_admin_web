@@ -8,7 +8,7 @@ import {generalAPI, generateIdObject, getServerData, getSharedData, isNotEmpty} 
 import TableMenu from "@/components/ui/menu/ServerMenu";
 import {nanoid} from "nanoid";
 import {setLocalStorage} from "@/utils/storage";
-import Servers from "@/components/ui/contents/Servers";
+import Index from "@/components/ui/contents/servers";
 import Tables from "@/components/ui/contents/tables";
 import {info} from "sass";
 
@@ -28,7 +28,7 @@ const App = () => {
             }else{
                 let key = nanoid(4);
                 dispatch({type: "CONTENTS", payload: [...state.contents, {label: info.node.title,
-                        children: <Servers/>,
+                        children: <Index/>,
                         key: key}]})
                 dispatch({type: "PANEL_ACTIVE", payload: key})
             }

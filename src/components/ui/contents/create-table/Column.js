@@ -31,7 +31,6 @@ export default function (){
         setMenuPosition({ x: event.clientX, y: event.clientY });
         setMenuVisible(true);
     };
-    const inputRef = useRef({});
     const handleMenuClick = (action) => {
         console.log(`Action: ${action} on`, selectedRow);
         setMenuVisible(false); // Hide menu after selection
@@ -54,25 +53,19 @@ export default function (){
         );
 
     };
-    //
-    // const handleChange = (key, field, value) => {
-    //     setData((prevData) =>
-    //         prevData.map((item) =>
-    //             item.key === key ? { ...item, [field]: value } : item
-    //         )
-    //     );
-    // };
+
+    const onUpdate = ()=>{
+        setData(tempData);
+    }
 
     const addRow = () => {
         const newData = [...tempData, { key: nanoid(8) }];
         setData(newData);
-        tempData = newData;
     }
 
     const removeRow = () => {
         const newData = tempData.filter(item => item.key !== selectedRow.key);
         setData(newData);
-        tempData = newData;
     }
     const columns = [
         {
@@ -86,6 +79,7 @@ export default function (){
 
                 <Input defaultValue={text}
                        // ref={inputRef}
+                       onBlur={() => onUpdate()}
                        rootClassName={styles.table__input}
                        onChange={(e) => handleChange(e, record.key, "name")}
                        // onChange={(value) => handleChange(record.key, "name", value)}
@@ -117,7 +111,7 @@ export default function (){
                 className: styles.table__td,
             }),
             render: (text, record) => (
-                <Input value={text} rootClassName={styles.table__input} onChange={(e) => handleChange(e, record.key, "age")} />
+                <Input value={text} onBlur={() => onUpdate()} rootClassName={styles.table__input} onChange={(e) => handleChange(e, record.key, "age")} />
             ),
         },
         {
@@ -192,13 +186,13 @@ export default function (){
                 className: styles.table__td,
             }),
             render: (text, record) => (
-                <Input value={text} rootClassName={styles.table__input} onChange={(e) => handleChange(e, record.key, "age")} />
+                <Input value={text} onBlur={() => onUpdate()} rootClassName={styles.table__input} onChange={(e) => handleChange(e, record.key, "age")} />
             ),
         },
     ];
     return(
     <div style={{ overflowX: "auto"}}>
-        <Table  bordered columns={columns} dataSource={tempData} pagination={false}
+        <Table  bordered columns={columns} dataSource={data} pagination={false}
                 // style={{ height: "100%", width: "100%" }}
                 // scroll={{ x: "max-content" }}
 

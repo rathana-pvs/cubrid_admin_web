@@ -1,7 +1,14 @@
 .tables{
-    height: 100%;
+    /*height: 100%;*/
     display: flex;
-    justify-content: space-between;
     flex-direction: column ;
-    gap: 12px;
+    gap: 18px;
+}
+
+.jobque__title{
+    font-weight: 500;
+    font-size: 13px;
+    padding: 4px 2px;
+    margin-top: 12px;
+    color: var(--primary-color);
 }
