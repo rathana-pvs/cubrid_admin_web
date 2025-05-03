@@ -12,6 +12,7 @@ export default function({node, event, open, onClose}) {
             label: "Disconnect Host",
             key: nanoid(4),
             icon: <ApiOutlined />,
+            onClick: () => {dispatch({type: "RESET_SERVER", payload: node.server_id});}
         },
         {
             label: "Add Host",
@@ -28,6 +29,48 @@ export default function({node, event, open, onClose}) {
         },
         {
             label: 'Delete Host',
+            key: nanoid(4),
+            icon: <DeleteOutlined style={{color: 'var(--danger-color)'}} />,
+            onClick: ()=> onDelete()
+
+        },
+        {
+            label: 'Export Connections to JDBC/CCI URL',
+            key: nanoid(4),
+            icon: <DeleteOutlined style={{color: 'var(--danger-color)'}} />,
+            onClick: ()=> onDelete()
+
+        },
+        {
+            label: 'Change Manager\'s Password',
+            key: nanoid(4),
+            icon: <DeleteOutlined style={{color: 'var(--danger-color)'}} />,
+            onClick: ()=> onDelete()
+
+        },
+        {
+            label: 'Show Host Dashboard',
+            key: nanoid(4),
+            icon: <DeleteOutlined style={{color: 'var(--danger-color)'}} />,
+            onClick: ()=> onDelete()
+
+        },
+        {
+            label: 'Server Version',
+            key: nanoid(4),
+            icon: <DeleteOutlined style={{color: 'var(--danger-color)'}} />,
+            onClick: ()=> onDelete()
+
+        },
+        {
+            label: 'Properties',
+            key: nanoid(4),
+            icon: <DeleteOutlined style={{color: 'var(--danger-color)'}} />,
+            onClick: ()=> onDelete()
+
+        },
+        {
+            label: 'Unify settings editor',
             key: nanoid(4),
             icon: <DeleteOutlined style={{color: 'var(--danger-color)'}} />,
             onClick: ()=> onDelete()

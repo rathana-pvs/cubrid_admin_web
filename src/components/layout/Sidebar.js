@@ -45,9 +45,9 @@ const App = () => {
                    <SideTreeBackup/>
                </div>
 
-               <div className={styles.side__property}>
-                   <SideProperty/>
-               </div>
+               {/*<div className={styles.side__property}>*/}
+               {/*    <SideProperty/>*/}
+               {/*</div>*/}
 
            </div>
 

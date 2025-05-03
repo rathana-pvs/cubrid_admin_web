@@ -4,58 +4,41 @@ import {
     DeleteOutlined,
     DownloadOutlined,
     EditOutlined, FileExcelOutlined, PicRightOutlined,
-    PlusOutlined,
+    PlusOutlined, ReloadOutlined,
     UploadOutlined
 } from "@ant-design/icons";
 import {nanoid} from "nanoid";
 import {useAppContext} from "@/context/AppContext";
-import Synonyms from "@/components/ui/contents/synonyms";
-import React from "react";
-import CreateTable from "@/components/ui/contents/create-table";
-
+import {setLocalStorage} from "@/utils/storage";
 
 export default function({node, event, open, onClose}) {
     const {state, dispatch} = useAppContext();
     const {clientX, clientY} = event;
     const menuItems = [
         {
-            label: "Create Table",
+            label: "Start All Broker",
             key: nanoid(4),
             icon: <PlusOutlined />,
-            onClick: ()=>onCreateTable(),
         },
         {
-            label: "Table Name Sort",
+            label: "Show Status",
             key: nanoid(4),
-            icon: <FileExcelOutlined />,
-            disabled: true,
+            icon: <ReloadOutlined />,
+
         },
         {
-            label: "Excel Export",
+            label: "Edit Broker",
             key: nanoid(4),
-            icon: <FileExcelOutlined />,
-            disabled: true,
+            icon: <ReloadOutlined />,
+
         },
         {
-            label: "Export",
+            label: "Properties",
             key: nanoid(4),
-            icon: <UploadOutlined />,
-        },
-        {
-            label: "Import",
-            key: nanoid(4),
-            icon: <DownloadOutlined />,
+            icon: <ReloadOutlined />,
+
         }
     ]
-
-    const onCreateTable = () => {
-        let key = nanoid(4);
-        dispatch({type: "CONTENTS", payload: [...state.contents, {label: "Create Table",
-                children: <CreateTable />,
-                key: key}]})
-        dispatch({type: "PANEL_ACTIVE", payload: key})
-    }
-
     return (
         <Dropdown overlayStyle={{minWidth: 200}}  menu={{items: menuItems}}
                   trigger={["contextMenu"]}

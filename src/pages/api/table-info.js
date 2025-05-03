@@ -1,7 +1,4 @@
-import {createConnection, query} from "@/lib/odbc-cubrid";
 import axiosInstance from "@/lib/agent";
-import {isNotEmpty} from "@/utils/utils";
-
 
 export default async function handler(req, res) {
 
@@ -9,15 +6,16 @@ export default async function handler(req, res) {
         const { method } = req;
 
         if (method === "POST"){
-            const { host, port, database, token} = req.body;
+            const { host, port, database, token, table} = req.body;
 
             const response = await axiosInstance.post(`https://${host}:${port}/cm_api`, {
                 dbname: database,
-                task:"userinfo",
+                classname: table,
+                task:"class",
                 token
             })
-            const result = response.data.user;
-            res.status(201).json({ success: true, result: result});
+            const result = response.data.classinfo[0];
+            res.status(200).json({ success: true, result: result});
         }else{
             res.setHeader('Allow', ['GET', 'POST', 'PUT', 'DELETE']);
             res.status(405).end(`Method ${method} not allowed`);

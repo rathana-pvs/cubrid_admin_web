@@ -97,3 +97,27 @@ export const getFormattedResults = (result) => {
         )
     );
 }
+
+export const formatMenuData = (data) => {
+    return data.map(item => {
+        const newItem = { ...item, key: nanoid(4) };
+        if (item.children) {
+            newItem.children = formatMenuData(item.children);
+        }
+        return newItem;
+    });
+
+}
+
+export const typeDisplay = (type) => {
+    if(type.includes("character varying(")){
+        return type.replace("character varying", "varchar");
+    }else if(type.includes("character(")){
+        return type.replace("character", "char");
+    }
+    return type
+}
+
+export const getAPIParam = (server)=>{
+    return {host: server.host, port: server.port, token: server.token};
+}

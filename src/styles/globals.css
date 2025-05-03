@@ -131,25 +131,28 @@ body {
 body {
     height: 100vh;
     display: grid;
-    grid-template-rows: 68px 1fr;
+    grid-template-rows: 28px 1fr;
     grid-template-columns: 1fr;
 }
 
 .main__container {
     display: grid;
     grid-template-columns: minmax(280px, auto) 1fr;
-    height: calc(100vh - 68px);
+    height: calc(100vh - 32px);
 }
 .sidebar {
     background-color: white;
     color: white;
     padding: 12px 8px;
     overflow-y: hidden;
-    border-right: 1px solid var(--border);
+    border: 1px solid var(--border);
     display: grid;
-    grid-template-rows: 40px auto 200px;
+    grid-template-rows: 40px auto;
     gap: 12px;
     max-width: 900px;
+    margin: 8px 0 8px 8px;
+    border-radius: 4px;
+
 
 }
 .sidebar .ant-radio-button-label{
@@ -167,7 +170,7 @@ body {
     border-radius: 4px;
     padding: 12px;
     overflow-y: auto;
-    margin: 18px;
+    margin: 8px;
     border: 1px solid var(--border);
     /*border: 1px solid var(--border);*/
 
@@ -210,3 +213,9 @@ body {
     height: 100%;
 }
 
+.icon__folder{
+    color: var(--folder-color);
+}
+.error{
+    color: rgb(242, 92, 84);
+}

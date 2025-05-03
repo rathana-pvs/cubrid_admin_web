@@ -2,6 +2,7 @@ import axiosInstance from "@/lib/agent";
 
 export default async function(req, res) {
     const { host, port, token } = req.body;
+    console.log(req.body);
     await axiosInstance.post(`https://${host}:${port}/cm_api`, {
         token,
         task:"startinfo",

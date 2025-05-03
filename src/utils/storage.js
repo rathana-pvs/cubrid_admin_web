@@ -18,12 +18,14 @@ export const getLocalStorage = (key) => {
 };
 
 export const createServerFormat =(item)=>{
+    const id = nanoid(8)
     item["login"] = {id: item.id, password: item.password};
-    item["key"] = item.server_id
+    item["key"] = id
     item["title"] = item["name"]
-    item["server_id"] = item.server_id
+    item["server_id"] = id
     item["type"] = "server"
     item["icon"] = <i className="fa-light fa-server success"/>
+    item["isLeaf"] = false
     return item;
 }
 

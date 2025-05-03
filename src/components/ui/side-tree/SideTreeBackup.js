@@ -4,7 +4,7 @@ import {Tree} from 'antd';
 import axios from "axios";
 import {setToken} from "@/utils/auth";
 import {useAppContext} from "@/context/AppContext";
-import {getDatabaseLogin} from "@/utils/utils";
+import {getAPIParam, getDatabaseLogin, isNotEmpty, typeDisplay} from "@/utils/utils";
 import {nanoid} from "nanoid";
 import Tables from "@/components/ui/contents/tables";
 import ServerMenu from "@/components/ui/menu/ServerMenu";
@@ -24,6 +24,10 @@ import Servers from "@/components/ui/contents/servers";
 import Brokers from "@/components/ui/contents/brokers";
 import Broker from "@/components/ui/contents/brokers/broker"
 import {info} from "sass";
+import DatabasesMenu from "@/components/ui/menu/DatabasesMenu";
+import BrokersMenu from "@/components/ui/menu/BrokersMenu";
+import BrokerMenu from "@/components/ui/menu/BrokerMenu";
+import DatabaseMenu from "@/components/ui/menu/DatabaseMenu";
 
 
 function buildTree(...dataSets) {
@@ -47,17 +51,22 @@ const App = () => {
     const {state, dispatch} = useAppContext();
     const [isClient, setIsClient] = useState(false);
     const [menu, setMenu] = useState({});
+    const [loadedKeys, setLoadedKeys] = useState([]);
     const handleContextMenu = (e) => {
         const {node} = e
         const menus = [
             {type: "server", Screen: ServerMenu},
+            {type: "databases", Screen: DatabasesMenu},
+            {type: "database", Screen: DatabaseMenu},
             {type: "tables", Screen: TablesMenu},
             {type: "views", Screen: ViewsMenu},
             {type: "serials", Screen: SerialsMenu},
             {type: "users", Screen: UsersMenu},
             {type: "triggers", Screen: TriggersMenu},
             {type: "synonyms", Screen: SynonymsMenu},
-            {type: "table", Screen: TableMenu}
+            {type: "table", Screen: TableMenu},
+            {type: "brokers", Screen: BrokersMenu},
+            {type: "broker", Screen: BrokerMenu}
         ]
         menus.forEach((item) => {
             if(item.type === node.type){
@@ -81,6 +90,8 @@ const App = () => {
             {type: "triggers", children: <Triggers/>},
             {type: "synonyms", children: <Synonyms/>}
         ]
+        dispatch({type: "SELECTED_OBJECT", payload: info.node});
+
         contents.forEach((res) => {
             if(res.type === info.node.type) {
                 const checkObject = state.contents.find(item => item.label === info.node.title) || false;
@@ -98,7 +109,6 @@ const App = () => {
         })
     };
     const loadData = async (node) => {
-
         switch (node.type) {
             case "server":{
                 const token = await setToken({...node, id: node.username})
@@ -122,6 +132,7 @@ const App = () => {
                             key: id,
                             icon: <i className={`fa-light ${item[1]}`}/>,
                             children: [],
+                            isLeaf: false,
                         }
                     })
                     dispatch({type: "SUB_SERVER", payload: subServer})
@@ -131,9 +142,15 @@ const App = () => {
             }
             case "databases":{
                 const server = state.servers.find(item => item.server_id === node.server_id)
-                const start_info = await axios.post("/api/start-info", {...server}).then(res=>res.data);
-                const activeList = start_info.activelist[0].active
+
+                const start_info = await axios.post("/api/start-info", getAPIParam(server)).then(res=>res.data);
+                console.log(start_info)
+                let  activeList = []
+                if(isNotEmpty(start_info.activelist)){
+                    activeList = start_info.activelist[0].active
+                }
                 const dbList = start_info.dblist[0].dbs
+                console.log(dbList)
                 const deActiveList = dbList.filter(obj2 => !activeList.some(obj1 => obj1.dbname === obj2.dbname));
                 deActiveList.forEach(item => item.status = "inactive");
                 const newDatabases = [...activeList, ...deActiveList].map(item => {
@@ -144,6 +161,7 @@ const App = () => {
                         title: item.dbname,
                         key: id,
                         type: "database",
+                        status: item.status,
                         icon: <i className={`fa-light fa-database ${item.status === "inactive" ? "warning" : "success"}`}/>
                     }
                 })
@@ -154,7 +172,7 @@ const App = () => {
             case "brokers": {
                 const server = state.servers.find(item => item.server_id === node.server_id)
                 const result = await axios.post("/api/general",
-                    {task: "getbrokersinfo", ...server}).then(res=>res.data);
+                    {task: "getbrokersinfo", ...getAPIParam(server)}).then(res=>res.data);
                 if(result.status === "success"){
 
                     const broker_info = result.brokersinfo[0].broker
@@ -178,10 +196,95 @@ const App = () => {
 
                 break
             }
+            case "logs":{
+                const subLog = [
+                    {
+                        parentId: node.key,
+                        title: "Broker",
+                        key: nanoid(8),
+                        type: "broker",
+                        icon: <i className="fa-light fa-folder-tree"></i>,
+                        sub: [
+                            {
+                                server_id: node.server_id,
+                                parentId: node.key,
+                                title: "Access Log",
+                                key: nanoid(8),
+                                type: "folder_admin_log",
+                                icon: <i className="fa-solid fa-folder icon__folder"></i>
+
+                            },
+                            {
+                                server_id: node.server_id,
+                                parentId: node.key,
+                                title: "Error Log",
+                                key: nanoid(8),
+                                type: "folder_admin_log",
+                                icon: <i className="fa-solid fa-folder icon__folder"></i>
+
+                            },
+                            {
+                                server_id: node.server_id,
+                                parentId: node.key,
+                                title: "Admin Log",
+                                key: nanoid(8),
+                                type: "folder_admin_log",
+                                icon: <i className="fa-solid fa-folder icon__folder"></i>
+
+                            }
+                        ]
+
+                    },
+                    {
+                        server_id: node.server_id,
+                        parentId: node.key,
+                        title: "Manager",
+                        key: nanoid(8),
+                        type: "manager",
+                        icon: <i className="fa-light fa-computer"></i>,
+                        sub: [
+                            {
+                                server_id: node.server_id,
+                                parentId: node.key,
+                                title: "Access Log",
+                                key: nanoid(8),
+                                type: "access_log",
+                                icon: <i className="fa-solid fa-file"></i>,
+                                isLeaf:true
+
+                            },
+                            {
+                                server_id: node.server_id,
+                                parentId: node.key,
+                                title: "Error Log",
+                                key: nanoid(8),
+                                type: "error_log",
+                                icon: <i className="fa-solid fa-file error"></i>,
+                                isLeaf: true,
+
+                            }
+                        ]
+
+                    },
+                    {
+                        server_id: node.server_id,
+                        parentId: node.key,
+                        title: "Server",
+                        key: nanoid(8),
+                        type: "log_server",
+                        icon: <i className="fa-light fa-server"></i>,
+                        sub: []
+
+                    }
+
+                ]
+                dispatch({type: "SUB_LOG", payload: subLog});
+                break;
+            }
             case "database":{
                 const childData = [["Tables", "fa-table-tree"], ["Views", "fa-eye"],
-                    ["Serials", "fa-input-numeric"], ["Users", "fa-users"],
-                    ["Triggers", "fa-gears"], ["Synonyms", "fa-table-list"]]
+                    ["Serials", "fa-input-numeric", {disabled: true, isLeaf:true}], ["Users", "fa-users"],
+                    ["Triggers", "fa-gears"], ["Stored Procedure", "fa-table-list", {disabled: true, isLeaf: true}]]
 
                     const subDatabase = childData.map(item => {
                         const id = nanoid(8)
@@ -195,6 +298,7 @@ const App = () => {
                             icon: <i className={`fa-light ${item[1]}`}/>,
                             children: [],
                             isLeaf: false,
+                            ...item[2]
 
                         }
                     })
@@ -208,7 +312,7 @@ const App = () => {
 
                 let allClass = []
 
-                const {result} = await axios.post("/api/list-tables", {database_login})
+                const {result} = await axios.post("/api/list-tables", {...getAPIParam(server), database: database.title, virtual: "normal" })
                     .then(res => res.data);
 
                 const systemId = nanoid(8)
@@ -218,12 +322,12 @@ const App = () => {
                     title: "System Tables",
                     key: `${node.key}-${systemId}`,
                     type: "system-table",
-                    icon: <i className="fa-light fa-folder"/>,
-                    sub: result.filter(res=>res.is_system_class === "YES").map((item) => ({
+                    icon: <i className="fa-solid fa-folder icon__folder"/>,
+                    sub: result.system_class.map((item) => ({
                             server_id: node.server_id,
                             database_id: node.parentId,
                             parentId: node.key,
-                            title: item.class_name,
+                            title: item.classname,
                             key: `${node.key}-${nanoid(8)}`,
                             type: "table",
                             icon: <i className="fa-light fa-table"/>,
@@ -231,12 +335,12 @@ const App = () => {
                             ...item
                     })),
                 })
-                result.filter(res=>res.is_system_class === "NO").forEach(item=>{
+                result.user_class.forEach(item=>{
                         allClass.push({
                             server_id: node.server_id,
                             database_id: node.parentId,
                             parentId: node.key,
-                            title: `${item.owner_name}.${item.class_name}`,
+                            title: `${item.classname}`,
                             key: `${node.key}-${nanoid(8)}`,
                             type: "table",
                             icon: <i className="fa-light fa-table"/>,
@@ -255,7 +359,7 @@ const App = () => {
                 const database_login = getDatabaseLogin(server, database)
                 let allView = []
 
-                const {result} = await axios.post("/api/list-views", {database_login})
+                const {result} = await axios.post("/api/list-tables", {...getAPIParam(server), database: database.title, virtual: "view" })
                     .then(res => res.data);
                 const viewId = nanoid(8)
                 allView.push({
@@ -264,12 +368,12 @@ const App = () => {
                     title: "System Views",
                     key: `${node.key}-${viewId}`,
                     type: "system-view",
-                    icon: <i className="fa-light fa-folder"/>,
-                    sub: result.filter(res=>res.is_system_class === "YES").map((item) => ({
+                    icon: <i className="fa-solid fa-folder icon__folder"/>,
+                    sub: result.system_class.map((item) => ({
                         server_id: node.server_id,
                         parentId: `${node.key}-${viewId}`,
                         id: nanoid(8),
-                        title: item.class_name,
+                        title: item.classname,
                         key: `${node.key}-${viewId}-${nanoid(8)}`,
                         type: "system-view",
                         icon: <i className="fa-light fa-eye"/>,
@@ -277,12 +381,12 @@ const App = () => {
                         ...item
                     })),
                 })
-                result.filter(res=>res.is_system_class === "NO").forEach(item=>{
+                result.user_class.forEach(item=>{
                         allView.push({
                             server_id: node.server_id,
                             database_id: node.parentId,
                             parentId: node.key,
-                            title: `${item.owner_name}.${item.class_name}`,
+                            title: `${item.classname}`,
                             key: `${node.key}-${nanoid(8)}`,
                             type: "view",
                             icon: <i className="fa-light fa-eye"/>,
@@ -293,41 +397,41 @@ const App = () => {
                 break
             }
             case "serials":{
-                const server = state.servers.find(item => item.server_id === node.server_id)
-                const database = state.databases.find(item => item.key === node.parentId)
-                const database_login = getDatabaseLogin(server, database)
-                const {result} = await axios.post("/api/list-serials", {database_login})
-                    .then(res => res.data);
-                const serialData = result.map(item => {
-                    return {
-                        server_id: node.server_id,
-                        database_id: node.parentId,
-                        parentId: node.key,
-                        title: `${item.owner_name}.${item.name}`,
-                        key: `${node.key}-${nanoid(8)}`,
-                        type: "serial",
-                        icon: <i className="fa-light fa-list-ol"/>,
-                        isLeaf: true,
-                        ...item
-                    }
-                })
-                dispatch({type: "SERIALS", payload: [...state.serials, ...serialData]})
+                // const server = state.servers.find(item => item.server_id === node.server_id)
+                // const database = state.databases.find(item => item.key === node.parentId)
+                // const database_login = getDatabaseLogin(server, database)
+                // const {result} = await axios.post("/api/list-serials", {database_login})
+                //     .then(res => res.data);
+                // const serialData = result.map(item => {
+                //     return {
+                //         server_id: node.server_id,
+                //         database_id: node.parentId,
+                //         parentId: node.key,
+                //         title: `${item.owner_name}.${item.name}`,
+                //         key: `${node.key}-${nanoid(8)}`,
+                //         type: "serial",
+                //         icon: <i className="fa-light fa-list-ol"/>,
+                //         isLeaf: true,
+                //         ...item
+                //     }
+                // })
+                // dispatch({type: "SERIALS", payload: [...state.serials, ...serialData]})
                 break
             }
             case "users":{
                 const server = state.servers.find(item => item.server_id === node.server_id)
                 const database = state.databases.find(item => item.key === node.parentId)
                 const database_login = getDatabaseLogin(server, database)
-                const {result} = await axios.post("/api/list-users", {database_login})
+                const {result} = await axios.post("/api/list-users", {...getAPIParam(server), database: database.title})
                     .then(res => res.data);
                 const newUser = result.map(item=>{
                     return {
                         server_id: node.server_id,
                         parentId: node.key,
-                        title: item.name,
+                        title: item["@name"],
                         key: `${node.key}-${nanoid(8)}`,
                         type: "user",
-                        icon: <i className="fa-light fa-user"/>,
+                        icon: <i className="fa-light fa-user success"/>,
                         isLeaf: true,
                         ...item
                     }
@@ -339,13 +443,13 @@ const App = () => {
                 const server = state.servers.find(item => item.server_id === node.server_id)
                 const database = state.databases.find(item => item.key === node.parentId)
                 const database_login = getDatabaseLogin(server, database)
-                const {result} = await axios.post("/api/list-triggers", {database_login})
+                const {result} = await axios.post("/api/list-triggers", {...getAPIParam(server), database: database.title})
                     .then(res => res.data);
                 const newTrigger = result.map(item=>{
                     return {
                         server_id: node.server_id,
                         parentId: node.key,
-                        title: `${item.owner_name}.${item.trigger_name}`,
+                        title: `${item.name}`,
                         key: `${node.key}-${nanoid(8)}`,
                         type: "trigger",
                         icon: <i className="fa-light fa-gear-code"></i>,
@@ -356,80 +460,80 @@ const App = () => {
                 dispatch({type: "TRIGGERS", payload: [...state.triggers, ...newTrigger]})
                 break
             }
-            case "synonyms":{
-                const server = state.servers.find(item => item.server_id === node.server_id)
-                const database = state.databases.find(item => item.key === node.parentId)
-                const database_login = getDatabaseLogin(server, database)
-                const {result} = await axios.post("/api/list-synonyms", {database_login})
-                    .then(res => res.data);
-                const newSynonym = result.map(item=>{
-                    return {
-                        server_id: node.server_id,
-                        parentId: node.key,
-                        title: `${item.synonym_owner_name}.${item.synonym_name}`,
-                        key: `${node.key}-${nanoid(8)}`,
-                        type: "synonym",
-                        icon: <i className="fa-light fa-gear-code"></i>,
-                        isLeaf: true,
-                        ...item
-                    }
-                })
-                dispatch({type: "SYNONYMS", payload: [...state.synonyms, ...newSynonym]})
+            case "stored procedure":{
+                // const server = state.servers.find(item => item.server_id === node.server_id)
+                // const database = state.databases.find(item => item.key === node.parentId)
+                // const database_login = getDatabaseLogin(server, database)
+                // const {result} = await axios.post("/api/list-procedures", {...server, database: database.title})
+                //     .then(res => res.data);
+                // const newProcedure = result.map(item=>{
+                //     return {
+                //         server_id: node.server_id,
+                //         parentId: node.key,
+                //         title: `${item.synonym_owner_name}.${item.synonym_name}`,
+                //         key: `${node.key}-${nanoid(8)}`,
+                //         type: "synonym",
+                //         icon: <i className="fa-light fa-gear-code"></i>,
+                //         isLeaf: true,
+                //         ...item
+                //     }
+                // })
+                // dispatch({type: "SYNONYMS", payload: [...state.synonyms, ...newSynonym]})
                 break
             }
             case "table":{
                 const server = state.servers.find(item => item.server_id === node.server_id)
                 const database = state.databases.find(item => item.key === node.database_id)
-                const database_login = getDatabaseLogin(server, database)
-                const table = node.title.split(".")
-                const columns = await axios.post("/api/column-info",
-                    {database_login, owner: table[0], table:table[1]})
+
+                const response = await axios.post("/api/table-info",
+                    {...getAPIParam(server), database: database.title, table: node.title})
                     .then(res => res.data)
-                const indexes = await axios.post("/api/index-info",
-                    {database_login, owner: table[0], table:table[1]})
-                    .then(res => res.data)
+                const {attribute, constraint} = response.result
                 let columnIndex = []
+
                 columnIndex.push({
                     parentId: node.key,
                     title: "Columns",
                     key: nanoid(8),
-                    icon: <i className="fa-light fa-folder"/>,
-                    sub: columns.result.map(item=>({
+                    icon: <i className="fa-solid fa-folder icon__folder"/>,
+                    sub: attribute.map(item=>({
                         server_id: node.server_id,
                         database_id: node.database_id,
                         parentId: node.key,
                         key: `${node.key}-${nanoid(8)}`,
-                        title: item.attr_name,
+                        title: `${item.name} (${typeDisplay(item.type)})`,
                         type: "column",
                         icon: <i className="fa-light fa-columns-3"/>,
                         isLeaf: true,
                         ...item
                     }))
                 })
-
+                //
                 columnIndex.push({
                     parentId: node.key,
                     title: "Indexes",
                     key: nanoid(8),
-                    icon: <i className="fa-light fa-folder"/>,
-                    sub: indexes.result.map(item=>({
+                    icon: <i className="fa-solid fa-folder icon__folder"/>,
+                    sub: constraint.map(item=>({
                         server_id: node.server_id,
                         database_id: node.database_id,
                         parentId: node.key,
                         key: `${node.key}-${nanoid(8)}`,
-                        title: item.index_name,
+                        title: item.name,
                         type: "index",
                         icon: <i className="fa-light fa-columns-3"/>,
                         isLeaf: true,
                         ...item
                     }))
                 })
-                dispatch({type: "COLUMNS", payload: [...state.columns, ...columnIndex]})
+                 dispatch({type: "COLUMNS", payload: [...state.columns, ...columnIndex]})
                 break
             }
 
 
         }
+
+        dispatch({type: "LOADED_KEY", payload: [...state.loaded_key, node.key]})
     }
 
 
@@ -441,23 +545,23 @@ const App = () => {
         return null
 
     }
-
     if (!isClient) return null;
     return (
-            <div>
+            <>
                 {renderManu()}
                 <Tree
+                    // loading={state.loaded_key}
                     onRightClick={handleContextMenu}
                     showLine
                     showIcon
                     loadData={loadData}
                     onSelect={onSelect}
                     treeData={buildTree(state.servers, state.sub_server,
-                        state.databases, state.brokers, state.sub_database, state.tables,
+                        state.databases, state.brokers, state.sub_log, state.sub_database, state.tables,
                         state.views, state.serials, state.users, state.triggers,
                         state.synonyms, state.columns)}
                 />
-            </div>
+            </>
     );
 };
 export default App;

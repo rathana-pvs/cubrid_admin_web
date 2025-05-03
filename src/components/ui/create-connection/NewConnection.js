@@ -78,7 +78,7 @@ export default function () {
     return (
         <>
             <Modal className={styles.modal} closeIcon={null}
-                   title={state.type==="add"? "New Connection": "Edit Connection"}
+                   title={state.connection.type==="add"? "New Connection": "Edit Connection"}
                    maskClosable={false} open={state.connection.open}
                    onOk={() => handleClose(true)}
                    onCancel={() => handleClose(false)} footer={null} centered={true}>
