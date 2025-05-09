@@ -2,6 +2,7 @@ import {getLocalConnections, getLocalStorage} from "@/utils/storage";
 import _ from "lodash";
 
 export const initialState = {
+    loading_screen: true,
     isOpen: false,
     isOpenDBLogin: false,
     loaded_key:[],
@@ -30,6 +31,8 @@ export const initialState = {
 
 export const appReducer = (state, action) => {
     switch (action.type) {
+        case "LOADING_SCREEN":
+            return {...state, loading_screen: action.payload};
         case "CONNECTION":
             return { ...state, connection: action.payload };
         case "LOADED_KEY":
@@ -81,7 +84,7 @@ export const appReducer = (state, action) => {
             const databases = state.databases.filter(res=>res.server_id !== action.payload);
             const sub_server = state.sub_server.filter(res=>res.server_id !== action.payload);
             const loaded_key = state.loaded_key.filter(res=>res !== action.payload);
-            return {...initialState, servers: getLocalConnections()};
+            return {...initialState, loading_screen: false, servers: getLocalConnections()};
         default:
             return state;
     }

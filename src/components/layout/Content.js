@@ -6,6 +6,7 @@ import TableTest from "@/components/ui/contents/create-table/TableTest";
 import Brokers from "@/components/ui/contents/brokers";
 import Servers from "@/components/ui/contents/servers";
 import {nanoid} from "nanoid";
+import LoadingScreen from "@/components/ui/loading/LoadingScreen";
 
 const Content = () => {
     const {state, dispatch} = useAppContext()
@@ -51,6 +52,7 @@ const Content = () => {
             {/*    items={[{label: "test", children: <Servers />, key: "t1"}]}>*/}
 
             {/*</Tabs>*/}
+
 
         </div>
 

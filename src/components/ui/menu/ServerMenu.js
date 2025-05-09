@@ -12,7 +12,7 @@ export default function({node, event, open, onClose}) {
             label: "Disconnect Host",
             key: nanoid(4),
             icon: <ApiOutlined />,
-            onClick: () => {dispatch({type: "RESET_SERVER", payload: node.server_id});}
+            onClick: () => {dispatch({type: "RESET_SERVER", payload: node.server_id})}
         },
         {
             label: "Add Host",

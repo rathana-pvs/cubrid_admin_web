@@ -17,9 +17,9 @@ export const getLocalStorage = (key) => {
     }
 };
 
-export const createServerFormat =(item)=>{
+export const createServerFormat =(server)=>{
+    const item = server
     const id = nanoid(8)
-    item["login"] = {id: item.id, password: item.password};
     item["key"] = id
     item["title"] = item["name"]
     item["server_id"] = id

@@ -7,15 +7,22 @@ import NewConnection from "@/components/ui/create-connection/NewConnection";
 import DBLogin from "@/components/ui/db-login/DBLogin";
 import Header from "@/components/ui/header/Header";
 import { IntlProvider } from 'next-intl'
+import LoadingScreen from "@/components/ui/loading/LoadingScreen";
+import {useAppContext} from "@/context/AppContext";
 
 
 export default function (props) {
+    const {dispatch} = useAppContext();
     const [locale, setLocale] = useState('en')
     const [messages, setMessages] = useState({})
 
     useEffect(() => {
         import(`@/locales/${locale}.json`).then(res => setMessages(res.default))
     }, [locale])
+
+    useEffect(()=>{
+        dispatch({type: "LOADING_SCREEN", payload: false})
+    },[])
 
     if (!Object.keys(messages).length) return null;
     return(
@@ -31,6 +38,7 @@ export default function (props) {
                </Layout>
                 <NewConnection/>
                 <DBLogin/>
+                <LoadingScreen/>
             </Layout>
         </IntlProvider>
 

@@ -1,6 +1,8 @@
-import {getLocalConnections, getLocalStorage} from "@/utils/storage";
+import {getLocalConnections, getLocalStorage, setLocalStorage} from "@/utils/storage";
 import {nanoid} from "nanoid";
 import axios from "axios";
+import React from "react";
+import {Modal} from "antd";
 
 
 export const getSharedData = (id) => {
@@ -121,3 +123,115 @@ export const typeDisplay = (type) => {
 export const getAPIParam = (server)=>{
     return {host: server.host, port: server.port, token: server.token};
 }
+
+
+export const onStartStopDatabase = async (state, dispatch) => {
+    dispatch({type: "LOADING_SCREEN", payload: true});
+    const {selected_object} = state;
+    const status = selected_object.status;
+    const server = state.servers.find(res => res.server_id === selected_object.server_id);
+    const response = await axios.post("/api/start-stop-db", {
+        ...getAPIParam(server),
+        database: selected_object.title,
+        type: status === "inactive" ? "start" : "stop",
+    }).then(res => res.data)
+    dispatch({type: "LOADING_SCREEN", payload: false});
+    if (response.success) {
+        const newDatabases = state.databases
+        newDatabases.forEach((item) => {
+            if (item.title === selected_object.title) {
+                item.status = status === "inactive" ? "active" : "inactive";
+                item.icon = <i className={`fa-light fa-database ${item.status === "inactive" ? "warning" : "success"}`}/>
+                dispatch({type: "SELECTED_OBJECT", payload: item});
+            }
+        })
+
+        dispatch({type: "DATABASES", payload: newDatabases});
+
+    }else{
+        Modal.error({
+            title: 'Broker',
+            content: response.note,
+            okText: 'Close',
+        });
+    }
+}
+
+
+export const setRememberPassword = (remember, server_id, connections)=>{
+    let newConnections = connections
+    console.log(remember, server_id, connections)
+    if(!remember){
+        newConnections = connections.map(({password, ...rest}) => {
+            if(rest.server_id === server_id) {
+                return rest
+            }
+            return {...rest, password};
+        })
+    }
+    console.log(newConnections);
+    setLocalStorage("connections", newConnections);
+}
+
+export const fetchAPILoading = (url, param, dispatch)=>{
+
+}
+
+export const onStartStopBroker = async (state, dispatch) => {
+    dispatch({type: "LOADING_SCREEN", payload: true});
+    const {selected_object} = state;
+    const status = selected_object.status;
+    const server = state.servers.find(res => res.server_id === selected_object.server_id);
+    const response = await axios.post("/api/start-stop-broker", {
+        ...getAPIParam(server),
+        type: status === "OFF" ? "start" : "stop",
+    }).then(res => res.data)
+    dispatch({type: "LOADING_SCREEN", payload: false});
+    if (response.success) {
+        const newSubServer = state.sub_server
+        newSubServer.filter(item => item.server_id === selected_object.server_id).forEach(item => {
+            if (item.title === selected_object.title) {
+                item.status = status === "OFF" ? "ON" : "OFF";
+                item.icon = <i className={`fa-light fa-folder-tree ${item.status === "OFF" ? "warning" : "success"}`}/>
+                dispatch({type: "SELECTED_OBJECT", payload: item});
+            }
+        })
+        dispatch({type: "SUB_SERVER", payload: newSubServer});
+    }else{
+        Modal.error({
+            title: 'Broker',
+            content: response.note,
+            okText: 'Close', // 🔁 Change "OK" to "Close"
+        });
+    }
+}
+
+export const onStartStopServer = async (state, dispatch) => {
+    dispatch({type: "LOADING_SCREEN", payload: true});
+    const {selected_object} = state;
+    const status = selected_object.status;
+    const server = state.servers.find(res => res.server_id === selected_object.server_id);
+    const response = await axios.post("/api/start-stop-server", {
+        ...getAPIParam(server),
+        type: status === "OFF" ? "start" : "stop",
+    }).then(res => res.data)
+    dispatch({type: "LOADING_SCREEN", payload: false});
+    if (response.success) {
+        const newSubServer = state.sub_server
+        newSubServer.filter(item => item.server_id === selected_object.server_id).forEach(item => {
+            if (item.title === selected_object.title) {
+                item.status = status === "OFF" ? "ON" : "OFF";
+                item.icon = <i className={`fa-light fa-folder-tree ${item.status === "OFF" ? "warning" : "success"}`}/>
+                dispatch({type: "SELECTED_OBJECT", payload: item});
+            }
+        })
+        dispatch({type: "SUB_SERVER", payload: newSubServer});
+    }else{
+        Modal.error({
+            title: 'Server',
+            content: response.note,
+            okText: 'Close',
+        });
+    }
+}
+

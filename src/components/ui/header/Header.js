@@ -6,61 +6,71 @@ import {Dropdown, Space} from "antd";
 import {DownOutlined, UserDeleteOutlined} from "@ant-design/icons";
 import {nanoid} from "nanoid";
 import {useTranslations} from "next-intl";
-import {formatMenuData, getAPIParam} from "@/utils/utils";
+import {formatMenuData, getAPIParam, onStartStopBroker, onStartStopDatabase} from "@/utils/utils";
 import useDispatch from "@/hooks/useDispatch";
 import {useAppContext} from "@/context/AppContext";
 import axios from "axios";
-const  file = (node, dispatch)=>[
-    {
-        label: 'Add Host',
-        onClick:()=>dispatch({type:"CONNECTION", payload:{type: "add", open:true}}),
-    },
-    {
-        label: 'Change Host Info',
-        disabled:node.type !== "server",
-        onClick:()=>dispatch({type:"CONNECTION", payload:{type: "edit", open:true, server_id: node.server_id}}),
-    },
-    {
-        label: 'Export Host Info',
-    },
-    {
-        label: 'Disconnect Host Connection',
-        disabled:node.type !== "server",
-    },
-    {
-        label: 'Delete Host',
-        disabled:node.type !== "server",
-    },
-    {
-        label: 'Close Current & All Window',
-    },
-    {
-        label: 'Import Workspace',
-        disabled:true
-    },
-    {
-        label: 'Change Workspace',
-        disabled:true
-    },
-    {
-        label: 'Basic Info',
-        children: [
-            {
-                label: 'Basic Info',
-                disabled:true
-            },
-        ]
-    },
-    {
-        label: 'Termination'
-    },
-    {
-        label: 'User Management'
-    },
-];
-const tools = (state, dispatch)=> {
+const  file = (state, dispatch)=> {
     const {selected_object} = state;
-    const disabled = selected_object.type !== "server" || noselected_objectde.type !== "database";
+    return [
+        {
+            label: 'Add Host',
+            onClick: () => dispatch({type: "CONNECTION", payload: {type: "add", open: true}}),
+        },
+        {
+            label: 'Change Host Info',
+            disabled: selected_object.type !== "server",
+            onClick: () => dispatch({
+                type: "CONNECTION",
+                payload: {type: "edit", open: true, server_id: selected_object.server_id}
+            }),
+        },
+        {
+            label: 'Export Host Info',
+        },
+        {
+            label: 'Disconnect Host Connection',
+            disabled: selected_object.type !== "server",
+            onClick: ()=>{dispatch({type: "RESET_SERVER", payload: selected_object.server_id})}
+        },
+        {
+            label: 'Delete Host',
+            disabled: selected_object.type !== "server",
+
+        },
+        {
+            label: 'Close Current & All Window',
+        },
+        {
+            label: 'Import Workspace',
+            disabled: true
+        },
+        {
+            label: 'Change Workspace',
+            disabled: true
+        },
+        {
+            label: 'Basic Info',
+            children: [
+                {
+                    label: 'Basic Info',
+                    disabled: true
+                },
+            ]
+        },
+        {
+            label: 'Termination'
+        },
+        {
+            label: 'User Management'
+        },
+    ];
+}
+const tools = (state, dispatch)=> {
+
+    const {selected_object} = state;
+    console.log(selected_object);
+    const disabled = selected_object.type !== "server" || selected_object.type !== "database";
     const disableDatabase = selected_object.type !== "database";
     return [
         {
@@ -82,32 +92,20 @@ const tools = (state, dispatch)=> {
                 return "Start Database";
             })(),
             disabled: selected_object.type !== "database",
-            onClick:async () => {
-                const server = state.servers.find(res => res.server_id === selected_object.server_id);
-                const response = await axios.post("/api/start-stop-db", {
-                    ...getAPIParam(server),
-                    database: selected_object.title,
-                    type: selected_object.status === "inactive" ? "start": "stop",
-                }).then(res => res.data)
-                if(response.success){
-                    const newDatabases = state.databases
-                    newDatabases.forEach((item)=>{
-                        if(item.title === selected_object.title){
-                            item.status = "active"
-                            item.icon = <i className={`fa-light fa-database success`}/>
-                        }
-                    })
-                    dispatch({type: "SELECTED_OBJECT", payload: {}});
-                    dispatch({type: "DATABASES", payload: [...state.databases, ...newDatabases]});
+            onClick: () => onStartStopDatabase(state, dispatch)
+        },
+        {
+            label: (()=>{
+                if(selected_object.type === "brokers") {
+                    if(selected_object.status === "OFF"){
+                        return "Start Brokers"
+                    }else
+                        return "Stop Brokers"
                 }
-            }
-
-        },
-        {
-            label: 'Stop Brokers'
-        },
-        {
-            label: 'Start Brokers'
+                return "Start Broker"
+            })(),
+            disabled: selected_object.type !== "brokers",
+            onClick: ()=>onStartStopBroker(state, dispatch)
         },
         {
             label: <span>Change Password Of <b>admin</b></span>
@@ -194,6 +192,7 @@ export default function ({setLocale}) {
     useEffect(() => {
         setLocale(lang)
     },[lang])
+
     return (
         <div className={styles.layout}>
             <div className={styles.layout__menu}>

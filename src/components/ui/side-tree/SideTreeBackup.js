@@ -1,10 +1,10 @@
 "use client";
 import React, {useEffect, useState} from 'react';
-import {Tree} from 'antd';
+import {Modal, Tree} from 'antd';
 import axios from "axios";
 import {setToken} from "@/utils/auth";
 import {useAppContext} from "@/context/AppContext";
-import {getAPIParam, getDatabaseLogin, isNotEmpty, typeDisplay} from "@/utils/utils";
+import {getAPIParam, isNotEmpty, typeDisplay} from "@/utils/utils";
 import {nanoid} from "nanoid";
 import Tables from "@/components/ui/contents/tables";
 import ServerMenu from "@/components/ui/menu/ServerMenu";
@@ -23,11 +23,11 @@ import SynonymsMenu from "@/components/ui/menu/SynonymsMenu";
 import Servers from "@/components/ui/contents/servers";
 import Brokers from "@/components/ui/contents/brokers";
 import Broker from "@/components/ui/contents/brokers/broker"
-import {info} from "sass";
 import DatabasesMenu from "@/components/ui/menu/DatabasesMenu";
 import BrokersMenu from "@/components/ui/menu/BrokersMenu";
 import BrokerMenu from "@/components/ui/menu/BrokerMenu";
 import DatabaseMenu from "@/components/ui/menu/DatabaseMenu";
+import {result} from "lodash";
 
 
 function buildTree(...dataSets) {
@@ -47,6 +47,32 @@ function buildTree(...dataSets) {
     return tree;
 }
 
+const contents = [
+    {type: "server", children: <Servers/>},
+    {type: "brokers", children: <Brokers/>},
+    {type: "broker", children: <Broker/>},
+    {type: "tables", children: <Tables/>},
+    {type: "views", children: <Views/>},
+    {type: "serials", children: <Serials/>},
+    {type: "users", children: <Users/>},
+    {type: "triggers", children: <Triggers/>},
+    {type: "synonyms", children: <Synonyms/>}
+]
+const menus = [
+    {type: "server", Screen: ServerMenu},
+    {type: "databases", Screen: DatabasesMenu},
+    {type: "database", Screen: DatabaseMenu},
+    {type: "tables", Screen: TablesMenu},
+    {type: "views", Screen: ViewsMenu},
+    {type: "serials", Screen: SerialsMenu},
+    {type: "users", Screen: UsersMenu},
+    {type: "triggers", Screen: TriggersMenu},
+    {type: "synonyms", Screen: SynonymsMenu},
+    {type: "table", Screen: TableMenu},
+    {type: "brokers", Screen: BrokersMenu},
+    {type: "broker", Screen: BrokerMenu}
+]
+
 const App = () => {
     const {state, dispatch} = useAppContext();
     const [isClient, setIsClient] = useState(false);
@@ -54,20 +80,7 @@ const App = () => {
     const [loadedKeys, setLoadedKeys] = useState([]);
     const handleContextMenu = (e) => {
         const {node} = e
-        const menus = [
-            {type: "server", Screen: ServerMenu},
-            {type: "databases", Screen: DatabasesMenu},
-            {type: "database", Screen: DatabaseMenu},
-            {type: "tables", Screen: TablesMenu},
-            {type: "views", Screen: ViewsMenu},
-            {type: "serials", Screen: SerialsMenu},
-            {type: "users", Screen: UsersMenu},
-            {type: "triggers", Screen: TriggersMenu},
-            {type: "synonyms", Screen: SynonymsMenu},
-            {type: "table", Screen: TableMenu},
-            {type: "brokers", Screen: BrokersMenu},
-            {type: "broker", Screen: BrokerMenu}
-        ]
+
         menus.forEach((item) => {
             if(item.type === node.type){
                 setMenu({...e, Screen: item.Screen,  open: true});
@@ -79,22 +92,14 @@ const App = () => {
     }, []);
 
     const onSelect = async (selectedKeys, info) => {
-        const contents = [
-            {type: "server", children: <Servers/>},
-            {type: "brokers", children: <Brokers/>},
-            {type: "broker", children: <Broker/>},
-            {type: "tables", children: <Tables/>},
-            {type: "views", children: <Views/>},
-            {type: "serials", children: <Serials/>},
-            {type: "users", children: <Users/>},
-            {type: "triggers", children: <Triggers/>},
-            {type: "synonyms", children: <Synonyms/>}
-        ]
-        dispatch({type: "SELECTED_OBJECT", payload: info.node});
-
+        if(selectedKeys.length > 0){
+            dispatch({type: "SELECTED_OBJECT", payload: info.node});
+        }else{
+            dispatch({type: "SELECTED_OBJECT", payload: {}});
+        }
         contents.forEach((res) => {
             if(res.type === info.node.type) {
-                const checkObject = state.contents.find(item => item.label === info.node.title) || false;
+                const checkObject = state.contents.find(item => item.label === info.node.title) || false
                 if(checkObject){
                     dispatch({type: "PANEL_ACTIVE", payload: checkObject.key});
                 }else{
@@ -109,13 +114,14 @@ const App = () => {
         })
     };
     const loadData = async (node) => {
+        // if (loadedKeys.includes(node.key)) return;
         switch (node.type) {
             case "server":{
-                const token = await setToken({...node, id: node.username})
-                if (token) {
+                const response = await setToken({...node})
+                if (response.token) {
                     const newServerData = state.servers.map(res => {
                         if(res.server_id === node.server_id){
-                            res.token = token;
+                            res.token = response.token;
                         }
                         return res;
                     });
@@ -135,22 +141,49 @@ const App = () => {
                             isLeaf: false,
                         }
                     })
-                    dispatch({type: "SUB_SERVER", payload: subServer})
-                }
-                break
+                    const result = await axios.post("/api/general",
+                        {task: "getbrokersinfo", ...getAPIParam({...node, token: response.token})})
+                        .then(res=>res.data);
+                    if(result.status === "success"){
+                        const broker_info = result.brokersinfo[0].broker
+                        if(broker_info){
+                            const newBrokers = broker_info.map(item => {
+                                return {
+                                    server_id: node.server_id,
+                                    parentId: subServer[1].key,
+                                    title: `${item.name} (${item.port})`,
+                                    key: nanoid(8),
+                                    type: "broker",
+                                    icon: <i className="fa-light fa-folder-gear"></i>,
+                                    data: item
+                                }
+                            })
 
+                            subServer[1]["status"] = result.brokerstatus;
+                            dispatch({type: "SUB_SERVER", payload: subServer})
+                            dispatch({type: "BROKERS", payload: [...state.brokers, ...newBrokers]});
+                        }
+                    }
+                }else{
+                    Modal.error({
+                            title: "Connection Failed",
+                            content: response.note,
+                            okText: "Close"
+                        }
+                    )
+                    throw new Error(response.note);
+                }
+
+                break
             }
             case "databases":{
                 const server = state.servers.find(item => item.server_id === node.server_id)
-
                 const start_info = await axios.post("/api/start-info", getAPIParam(server)).then(res=>res.data);
-                console.log(start_info)
                 let  activeList = []
                 if(isNotEmpty(start_info.activelist)){
                     activeList = start_info.activelist[0].active
                 }
                 const dbList = start_info.dblist[0].dbs
-                console.log(dbList)
                 const deActiveList = dbList.filter(obj2 => !activeList.some(obj1 => obj1.dbname === obj2.dbname));
                 deActiveList.forEach(item => item.status = "inactive");
                 const newDatabases = [...activeList, ...deActiveList].map(item => {
@@ -165,34 +198,31 @@ const App = () => {
                         icon: <i className={`fa-light fa-database ${item.status === "inactive" ? "warning" : "success"}`}/>
                     }
                 })
-
                 dispatch({type: "DATABASES", payload: [...state.databases, ...newDatabases]});
                 break;
             }
             case "brokers": {
-                const server = state.servers.find(item => item.server_id === node.server_id)
-                const result = await axios.post("/api/general",
-                    {task: "getbrokersinfo", ...getAPIParam(server)}).then(res=>res.data);
-                if(result.status === "success"){
-
-                    const broker_info = result.brokersinfo[0].broker
-
-                    if(broker_info){
-                        const newBrokers = broker_info.map(item => {
-                            return {
-                                server_id: node.server_id,
-                                parentId: node.key,
-                                title: `${item.name} (${item.port},${item.access_mode})`,
-                                key: nanoid(8),
-                                type: "broker",
-                                icon: <i className="fa-light fa-folder-gear"></i>,
-                                data: item
-
-                            }
-                        })
-                        dispatch({type: "BROKERS", payload: [...state.brokers, ...newBrokers]});
-                    }
-                }
+                // const server = state.servers.find(item => item.server_id === node.server_id)
+                // const result = await axios.post("/api/general",
+                //     {task: "getbrokersinfo", ...getAPIParam(server)}).then(res=>res.data);
+                // if(result.status === "success"){
+                //     const broker_info = result.brokersinfo[0].broker
+                //     if(broker_info){
+                //         const newBrokers = broker_info.map(item => {
+                //             return {
+                //                 server_id: node.server_id,
+                //                 parentId: node.key,
+                //                 title: `${item.name} (${item.port})`,
+                //                 key: nanoid(8),
+                //                 type: "broker",
+                //                 icon: <i className="fa-light fa-folder-gear"></i>,
+                //                 data: item
+                //
+                //             }
+                //         })
+                //         dispatch({type: "BROKERS", payload: [...state.brokers, ...newBrokers]});
+                //     }
+                // }
 
                 break
             }
@@ -212,7 +242,6 @@ const App = () => {
                                 key: nanoid(8),
                                 type: "folder_admin_log",
                                 icon: <i className="fa-solid fa-folder icon__folder"></i>
-
                             },
                             {
                                 server_id: node.server_id,
@@ -221,7 +250,6 @@ const App = () => {
                                 key: nanoid(8),
                                 type: "folder_admin_log",
                                 icon: <i className="fa-solid fa-folder icon__folder"></i>
-
                             },
                             {
                                 server_id: node.server_id,
@@ -230,10 +258,8 @@ const App = () => {
                                 key: nanoid(8),
                                 type: "folder_admin_log",
                                 icon: <i className="fa-solid fa-folder icon__folder"></i>
-
                             }
                         ]
-
                     },
                     {
                         server_id: node.server_id,
@@ -261,10 +287,8 @@ const App = () => {
                                 type: "error_log",
                                 icon: <i className="fa-solid fa-file error"></i>,
                                 isLeaf: true,
-
                             }
                         ]
-
                     },
                     {
                         server_id: node.server_id,
@@ -274,17 +298,15 @@ const App = () => {
                         type: "log_server",
                         icon: <i className="fa-light fa-server"></i>,
                         sub: []
-
                     }
-
                 ]
                 dispatch({type: "SUB_LOG", payload: subLog});
                 break;
             }
             case "database":{
                 const childData = [["Tables", "fa-table-tree"], ["Views", "fa-eye"],
-                    ["Serials", "fa-input-numeric", {disabled: true, isLeaf:true}], ["Users", "fa-users"],
-                    ["Triggers", "fa-gears"], ["Stored Procedure", "fa-table-list", {disabled: true, isLeaf: true}]]
+                    ["Serials", "fa-input-numeric", {disabled: true, isLeaf:false}], ["Users", "fa-users"],
+                    ["Triggers", "fa-gears"], ["Stored Procedure", "fa-table-list", {disabled: true, isLeaf: false}]]
 
                     const subDatabase = childData.map(item => {
                         const id = nanoid(8)
@@ -308,13 +330,9 @@ const App = () => {
             case "tables":{
                 const server = state.servers.find(item => item.server_id === node.server_id)
                 const database = state.databases.find(item => item.key === node.parentId)
-                const database_login = getDatabaseLogin(server, database)
-
                 let allClass = []
-
                 const {result} = await axios.post("/api/list-tables", {...getAPIParam(server), database: database.title, virtual: "normal" })
                     .then(res => res.data);
-
                 const systemId = nanoid(8)
                 allClass.push({
                     server_id: node.server_id,
@@ -347,8 +365,6 @@ const App = () => {
                             ...item
                         })
                 })
-
-
                 dispatch({type: "TABLES", payload: [...state.tables, ...allClass]})
 
                 break;
@@ -356,10 +372,9 @@ const App = () => {
             case "views":{
                 const server = state.servers.find(item => item.server_id === node.server_id)
                 const database = state.databases.find(item => item.key === node.parentId)
-                const database_login = getDatabaseLogin(server, database)
                 let allView = []
-
-                const {result} = await axios.post("/api/list-tables", {...getAPIParam(server), database: database.title, virtual: "view" })
+                const {result} = await axios.post("/api/list-tables",
+                    {...getAPIParam(server), database: database.title, virtual: "view" })
                     .then(res => res.data);
                 const viewId = nanoid(8)
                 allView.push({
@@ -421,7 +436,6 @@ const App = () => {
             case "users":{
                 const server = state.servers.find(item => item.server_id === node.server_id)
                 const database = state.databases.find(item => item.key === node.parentId)
-                const database_login = getDatabaseLogin(server, database)
                 const {result} = await axios.post("/api/list-users", {...getAPIParam(server), database: database.title})
                     .then(res => res.data);
                 const newUser = result.map(item=>{
@@ -442,22 +456,33 @@ const App = () => {
             case "triggers":{
                 const server = state.servers.find(item => item.server_id === node.server_id)
                 const database = state.databases.find(item => item.key === node.parentId)
-                const database_login = getDatabaseLogin(server, database)
-                const {result} = await axios.post("/api/list-triggers", {...getAPIParam(server), database: database.title})
+                const response = await axios.post("/api/list-triggers", {...getAPIParam(server), database: database.title})
                     .then(res => res.data);
-                const newTrigger = result.map(item=>{
-                    return {
-                        server_id: node.server_id,
-                        parentId: node.key,
-                        title: `${item.name}`,
-                        key: `${node.key}-${nanoid(8)}`,
-                        type: "trigger",
-                        icon: <i className="fa-light fa-gear-code"></i>,
-                        isLeaf: true,
-                        ...item
-                    }
-                })
-                dispatch({type: "TRIGGERS", payload: [...state.triggers, ...newTrigger]})
+                if(response.success){
+                    const newTrigger = response.result.map(item=>{
+                        return {
+                            server_id: node.server_id,
+                            parentId: node.key,
+                            title: `${item.name}`,
+                            key: `${node.key}-${nanoid(8)}`,
+                            type: "trigger",
+                            icon: <i className="fa-light fa-gear-code"></i>,
+                            isLeaf: true,
+                            ...item
+                        }
+                    })
+                    dispatch({type: "TRIGGERS", payload: [...state.triggers, ...newTrigger]})
+                }else{
+                    Modal.error({
+                            title: "Trigger Error",
+                            content: response.note,
+                            okText: "Close"
+                        }
+                    )
+                    throw new Error(response.note);
+
+                }
+
                 break
             }
             case "stored procedure":{
@@ -546,6 +571,7 @@ const App = () => {
 
     }
     if (!isClient) return null;
+    console.log(state)
     return (
             <>
                 {renderManu()}
@@ -556,10 +582,12 @@ const App = () => {
                     showIcon
                     loadData={loadData}
                     onSelect={onSelect}
+                    // loadedKeys={loadedKeys}
                     treeData={buildTree(state.servers, state.sub_server,
                         state.databases, state.brokers, state.sub_log, state.sub_database, state.tables,
                         state.views, state.serials, state.users, state.triggers,
                         state.synonyms, state.columns)}
+
                 />
             </>
     );

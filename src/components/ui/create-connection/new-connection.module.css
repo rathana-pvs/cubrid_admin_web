@@ -9,6 +9,9 @@
 }
 .action{
     width: 100% !important;
+    display: flex;
+    justify-content: flex-end;
+    gap: 20px;
 
 }
 .action button{
