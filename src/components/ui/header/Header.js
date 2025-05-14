@@ -1,15 +1,12 @@
 import React, {useEffect, useState} from "react";
 import styles from "./header.module.css";
-import {Header} from "antd/es/layout/layout";
-import Button from '@/components/ui/button/Button'
-import {Dropdown, Space} from "antd";
-import {DownOutlined, UserDeleteOutlined} from "@ant-design/icons";
+import {Dropdown} from "antd";
+import {UserDeleteOutlined} from "@ant-design/icons";
 import {nanoid} from "nanoid";
 import {useTranslations} from "next-intl";
-import {formatMenuData, getAPIParam, onStartStopBroker, onStartStopDatabase} from "@/utils/utils";
-import useDispatch from "@/hooks/useDispatch";
+import {onStartStopBroker, onStartStopDatabase} from "@/utils/utils";
 import {useAppContext} from "@/context/AppContext";
-import axios from "axios";
+import {setLocalStorage} from "@/utils/storage";
 const  file = (state, dispatch)=> {
     const {selected_object} = state;
     return [
@@ -36,6 +33,11 @@ const  file = (state, dispatch)=> {
         {
             label: 'Delete Host',
             disabled: selected_object.type !== "server",
+            onClick: ()=>{
+                const connections = state.servers.filter(item => item.server_id !== selected_object.server_id);
+                setLocalStorage("connections", connections);
+                dispatch({type: "SERVERS", payload: connections});
+            }
 
         },
         {
@@ -92,7 +94,7 @@ const tools = (state, dispatch)=> {
                 return "Start Database";
             })(),
             disabled: selected_object.type !== "database",
-            onClick: () => onStartStopDatabase(state, dispatch)
+            onClick: () => onStartStopDatabase(selected_object, state, dispatch)
         },
         {
             label: (()=>{

@@ -4,6 +4,7 @@ import {
 } from "@ant-design/icons";
 import {nanoid} from "nanoid";
 import {useAppContext} from "@/context/AppContext";
+import {onStartStopDatabase} from "@/utils/utils";
 
 export default function({node, event, open, onClose}) {
     const {state, dispatch} = useAppContext();
@@ -153,9 +154,10 @@ export default function({node, event, open, onClose}) {
             icon: <ReloadOutlined />,
         },
         {
-            label: "Database Start",
+            label: node.status === "inactive" ? "Start Database" : "Stop Database",
             key: nanoid(4),
             icon: <ReloadOutlined />,
+            onClick: () => onStartStopDatabase(node, state, dispatch)
         },
         {
             label: "Manage Database",

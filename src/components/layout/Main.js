@@ -3,12 +3,13 @@ import {Layout} from "antd";
 import AppBar from "@/components/layout/AppBar";
 import React, {useEffect, useState} from "react";
 import Sidebar from "@/components/layout/Sidebar";
-import NewConnection from "@/components/ui/create-connection/NewConnection";
+import NewConnection from "@/components/ui/dialog/NewConnection";
 import DBLogin from "@/components/ui/db-login/DBLogin";
 import Header from "@/components/ui/header/Header";
 import { IntlProvider } from 'next-intl'
 import LoadingScreen from "@/components/ui/loading/LoadingScreen";
 import {useAppContext} from "@/context/AppContext";
+import CreateDatabase from "@/components/ui/dialog/CreateDatabase";
 
 
 export default function (props) {
@@ -39,6 +40,7 @@ export default function (props) {
                 <NewConnection/>
                 <DBLogin/>
                 <LoadingScreen/>
+                <CreateDatabase/>
             </Layout>
         </IntlProvider>
 

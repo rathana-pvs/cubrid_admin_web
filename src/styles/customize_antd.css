@@ -15,7 +15,7 @@
     color: var(--danger-color);
 }
 .ant-form-item-label{
-    /*padding-bottom: 4px !important;*/
+    padding-bottom: 4px !important;
 }
 .ant-form-item-label >label, .ant-checkbox-label{
     /*font-size: 14px !important;*/

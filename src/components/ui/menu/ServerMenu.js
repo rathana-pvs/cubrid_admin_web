@@ -59,7 +59,9 @@ export default function({node, event, open, onClose}) {
             label: 'Server Version',
             key: nanoid(4),
             icon: <DeleteOutlined style={{color: 'var(--danger-color)'}} />,
-            onClick: ()=> onDelete()
+            onClick: ()=> {
+
+            }
 
         },
         {

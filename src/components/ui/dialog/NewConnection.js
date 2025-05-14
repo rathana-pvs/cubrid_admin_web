@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import {Button, Checkbox, Col, Form, Input, message, Modal, Row, Select, Space} from "antd";
 import {useAppContext} from "@/context/AppContext";
-import styles from "./new-connection.module.css";
+import styles from "./dialog.module.css";
 import {appendToLocalStorage, createServerFormat, getLocalStorage, setLocalStorage} from "@/utils/storage";
 import { v4 as uuid } from 'uuid';
 import {nanoid} from "nanoid";

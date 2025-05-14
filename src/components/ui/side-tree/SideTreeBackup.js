@@ -571,7 +571,6 @@ const App = () => {
 
     }
     if (!isClient) return null;
-    console.log(state)
     return (
             <>
                 {renderManu()}

@@ -125,21 +125,20 @@ export const getAPIParam = (server)=>{
 }
 
 
-export const onStartStopDatabase = async (state, dispatch) => {
+export const onStartStopDatabase = async (node, state, dispatch) => {
     dispatch({type: "LOADING_SCREEN", payload: true});
-    const {selected_object} = state;
-    const status = selected_object.status;
-    const server = state.servers.find(res => res.server_id === selected_object.server_id);
+    const status = node.status;
+    const server = state.servers.find(res => res.server_id === node.server_id);
     const response = await axios.post("/api/start-stop-db", {
         ...getAPIParam(server),
-        database: selected_object.title,
+        database: node.title,
         type: status === "inactive" ? "start" : "stop",
     }).then(res => res.data)
     dispatch({type: "LOADING_SCREEN", payload: false});
     if (response.success) {
         const newDatabases = state.databases
         newDatabases.forEach((item) => {
-            if (item.title === selected_object.title) {
+            if (item.title === node.title) {
                 item.status = status === "inactive" ? "active" : "inactive";
                 item.icon = <i className={`fa-light fa-database ${item.status === "inactive" ? "warning" : "success"}`}/>
                 dispatch({type: "SELECTED_OBJECT", payload: item});

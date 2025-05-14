@@ -19,6 +19,9 @@ export default function({node, event, open, onClose}) {
             label: "Create Database",
             key: nanoid(4),
             icon: <PlusOutlined />,
+            onClick: ()=>{
+                dispatch({type: "CREATE_DATABASE", payload: {open: true}});
+            },
         },
         {
             label: "Properties",

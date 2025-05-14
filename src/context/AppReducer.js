@@ -2,6 +2,9 @@ import {getLocalConnections, getLocalStorage} from "@/utils/storage";
 import _ from "lodash";
 
 export const initialState = {
+    create_database: {
+        open: false,
+    },
     loading_screen: true,
     isOpen: false,
     isOpenDBLogin: false,
@@ -35,6 +38,8 @@ export const appReducer = (state, action) => {
             return {...state, loading_screen: action.payload};
         case "CONNECTION":
             return { ...state, connection: action.payload };
+        case "CREATE_DATABASE":
+            return {...state, create_database: action.payload};
         case "LOADED_KEY":
             return { ...state, loaded_key: action.payload };
         case "LOGIN_DB_STATE":

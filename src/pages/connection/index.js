@@ -2,7 +2,7 @@ import React, {useEffect} from 'react';
 import {Col, Row} from 'antd';
 import Header from "@/components/ui/header/Header";
 import styles from "./connection.module.css";
-import NewConnection from "@/components/ui/create-connection/NewConnection";
+import NewConnection from "@/components/ui/dialog/NewConnection";
 import {ConnectionProvider, useConnectionContext} from "@/context/AppContext";
 import {getLocalStorage} from "@/utils/storage";
 import ConnectionCard from "@/components/ui/connection-card/ConnectionCard";
