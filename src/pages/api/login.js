@@ -15,7 +15,7 @@ export default async function handler(req, res) {
             const response = await axiosInstance.post(`https://${host}:${port}/cm_api`, {
                 id, password,
                 task:"login",
-                clientver: "11.3"
+                clientver: "8.4"
             })
             let data = response.data;
             if(remember){

@@ -12,9 +12,6 @@ import SideTree from "@/components/ui/side-tree";
 import SideTreeBackup from "@/components/ui/side-tree/SideTreeBackup";
 
 const App = () => {
-    const {
-        token: { colorBgContainer, borderRadiusLG },
-    } = theme.useToken();
     return (
 
            <div className={"sidebar"}>

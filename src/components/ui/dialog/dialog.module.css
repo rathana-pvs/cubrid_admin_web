@@ -1,5 +1,5 @@
 .modal{
-    width: 580px !important;
+    min-width: 580px !important;
 }
 
 .timeout__select{
@@ -16,4 +16,7 @@
 }
 .action button{
     min-width: 100px !important;
+}
+.selected__row {
+    background-color: color-mix(in srgb, var(--primary-color) 10%, transparent) !important;
 }

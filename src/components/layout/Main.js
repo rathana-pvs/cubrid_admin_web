@@ -10,6 +10,7 @@ import { IntlProvider } from 'next-intl'
 import LoadingScreen from "@/components/ui/loading/LoadingScreen";
 import {useAppContext} from "@/context/AppContext";
 import CreateDatabase from "@/components/ui/dialog/CreateDatabase";
+import UserManagement from "@/components/ui/dialog/user-management/UserManagement";
 
 
 export default function (props) {
@@ -41,6 +42,7 @@ export default function (props) {
                 <DBLogin/>
                 <LoadingScreen/>
                 <CreateDatabase/>
+                <UserManagement/>
             </Layout>
         </IntlProvider>
 

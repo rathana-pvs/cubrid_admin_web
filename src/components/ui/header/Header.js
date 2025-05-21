@@ -71,7 +71,6 @@ const  file = (state, dispatch)=> {
 const tools = (state, dispatch)=> {
 
     const {selected_object} = state;
-    console.log(selected_object);
     const disabled = selected_object.type !== "server" || selected_object.type !== "database";
     const disableDatabase = selected_object.type !== "database";
     return [
@@ -113,7 +112,8 @@ const tools = (state, dispatch)=> {
             label: <span>Change Password Of <b>admin</b></span>
         },
         {
-            label: 'Add CA users'
+            label: 'User Management',
+            onClick: () => dispatch({type: "USER_MANAGEMENT", payload: {open: true}}),
         },
         {
             label: 'Convert Broker log to SQL'

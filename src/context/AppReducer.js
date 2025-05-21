@@ -5,6 +5,12 @@ export const initialState = {
     create_database: {
         open: false,
     },
+    user_management: {
+        open: false,
+    },
+    create_user:{
+        open: false,
+    },
     loading_screen: true,
     isOpen: false,
     isOpenDBLogin: false,
@@ -38,6 +44,8 @@ export const appReducer = (state, action) => {
             return {...state, loading_screen: action.payload};
         case "CONNECTION":
             return { ...state, connection: action.payload };
+        case "USER_MANAGEMENT":
+            return { ...state, user_management: action.payload };
         case "CREATE_DATABASE":
             return {...state, create_database: action.payload};
         case "LOADED_KEY":

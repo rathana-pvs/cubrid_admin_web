@@ -223,3 +223,6 @@ body {
 .error{
     color: rgb(242, 92, 84);
 }
+.no-wrap {
+    white-space: nowrap;
+}

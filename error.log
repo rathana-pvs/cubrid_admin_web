@@ -1,0 +1,17 @@
+[2025-05-16T06:54:36.119Z] Error: write EPROTO A8180000:error:0A000102:SSL routines:ssl_choose_client_version:unsupported protocol:c:\ws\deps\openssl\openssl\ssl\statem\statem_lib.c:1992:
+
+Stack: Error: write EPROTO A8180000:error:0A000102:SSL routines:ssl_choose_client_version:unsupported protocol:c:\ws\deps\openssl\openssl\ssl\statem\statem_lib.c:1992:
+
+    at AxiosError.from (C:\Users\ratha\WebstormProjects\ca_admin\node_modules\axios\dist\node\axios.cjs:877:14)
+    at RedirectableRequest.handleRequestError (C:\Users\ratha\WebstormProjects\ca_admin\node_modules\axios\dist\node\axios.cjs:3163:25)
+    at RedirectableRequest.emit (node:events:518:28)
+    at eventHandlers.<computed> (C:\Users\ratha\WebstormProjects\ca_admin\node_modules\follow-redirects\index.js:49:24)
+    at ClientRequest.emit (node:events:518:28)
+    at emitErrorEvent (node:_http_client:101:11)
+    at TLSSocket.socketErrorListener (node:_http_client:504:5)
+    at TLSSocket.emit (node:events:518:28)
+    at emitErrorNT (node:internal/streams/destroy:169:8)
+    at emitErrorCloseNT (node:internal/streams/destroy:128:3)
+    at Axios.request (C:\Users\ratha\WebstormProjects\ca_admin\node_modules\axios\dist\node\axios.cjs:4252:41)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+
