@@ -8,25 +8,22 @@ export default async function handler(req, res) {
         const { method } = req;
 
         if (method === "POST"){
-            const { host, port, database, token} = req.body;
-
+            const { host, port, token, broker} = req.body;
             const response = await axiosInstance.post(`https://${host}:${port}/cm_api`, {
-                dbname: database,
-                task:"gettriggerinfo",
+                bname: broker,
+                task: "broker_stop",
                 token
-            })
-            let result = []
-            console.log(response.data)
-            if(response.data.triggerlist){
-                result = response.data.triggerlist[0].triggerinfo;
+            }).then(res=>res.data)
+            if(response.status === "success"){
+                res.status(200).json({...response, status: true});
+            }else {
+                res.status(201).json({...response, status: false});
             }
-
-            res.status(201).json({ success: true, result: result});
         }else{
             res.setHeader('Allow', ['GET', 'POST', 'PUT', 'DELETE']);
             res.status(405).end(`Method ${method} not allowed`);
         }
     } catch (error) {
-        res.status(200).json({ success: false, note: error.message });
+        res.status(500).json({ success: false, message: error.message });
     }
 }

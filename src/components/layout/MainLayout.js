@@ -1,0 +1,50 @@
+
+import {Layout} from "antd";
+import React, {useEffect, useState} from "react";
+import { IntlProvider } from 'next-intl'
+
+// import {useAppContext} from "@/context/AppContext";
+
+import NavBar from "@/components/layout/nav-bar/NavBar";
+import SideNavigation from "@/components/layout/side-navigation/SideNavigation";
+import NewConnection from "@/components/ui/dialogs/NewConnection";
+import UserManagement from "@/components/ui/dialogs/user-management/UserManagement";
+import CreateUserDB from "@/components/ui/dialogs/CreateUserDB";
+
+
+export default function (props) {
+    const [locale, setLocale] = useState('en')
+    const [messages, setMessages] = useState({})
+
+    useEffect(() => {
+        import(`@/locales/${locale}.json`).then(res => setMessages(res.default))
+    }, [locale])
+
+    // useEffect(()=>{
+    //     dispatch({type: "LOADING_SCREEN", payload: false})
+    // },[])
+
+    if (!Object.keys(messages).length) return null;
+    return(
+        <IntlProvider locale={locale} messages={messages}>
+            <Layout>
+                <NavBar setLocale={setLocale}/>
+                {/*<AppBar/>*/}
+                <Layout className={"main__container"}>
+                    <SideNavigation/>
+                    <main className="main__content">
+                        {props.children}
+                    </main>
+                </Layout>
+                <NewConnection/>
+                <UserManagement/>
+                <CreateUserDB/>
+                {/*<DBLogin/>*/}
+                {/*<LoadingScreen/>*/}
+                {/*<CreateDatabase/>*/}
+                {/*<UserManagement/>*/}
+            </Layout>
+        </IntlProvider>
+
+    )
+}

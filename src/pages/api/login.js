@@ -9,13 +9,13 @@ export default async function handler(req, res) {
         if (method === "POST"){
 
             let { host, port, id, remember } = req.body;
-
+            console.log(`${host}:${port}`);
             let password = verifyToken(req.body.password);
 
             const response = await axiosInstance.post(`https://${host}:${port}/cm_api`, {
                 id, password,
                 task:"login",
-                clientver: "11.3"
+                clientver: "8.4"
             })
             let data = response.data;
             if(remember){

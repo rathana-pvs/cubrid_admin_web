@@ -1,12 +1,29 @@
-// pages/_app.js
-"use client"
-import '../styles/globals.css';
+import {Provider, useSelector} from 'react-redux';
+import {store} from '@/state/store';
 import {ConfigProvider} from "antd";
-import {blue} from "next/dist/lib/picocolors";
-import Head from "next/head"; // Your custom global styles
-import { App as AntdApp } from "antd";
-import MainLayout from "../components/layout/Main";
-import {AppProvider} from "@/context/AppContext";
+import '../styles/globals.css';
+import {IntlProvider} from "next-intl";
+import {useEffect, useState} from "react";
+import LoadingScreen from "@/components/ui/dialogs/LoadingScreen";
+
+function LocaleWrapper({children}) {
+    const locale = useSelector((state) => state.general.locale);
+    const [messages, setMessages] = useState(null);
+
+    useEffect(() => {
+        setMessages(null);
+        import(`@/locales/${locale}.json`).then(res => setMessages(res.default))
+    }, [locale])
+
+    if (!messages) return null;
+
+    return (
+        <IntlProvider key={locale} locale={locale} messages={messages}>
+            {children}
+        </IntlProvider>
+    );
+}
+
 const theme = {
     token: {
         colorPrimary: 'rgb(44, 62, 80)', // Custom primary color
@@ -32,24 +49,18 @@ const theme = {
         }
     },
 };
-function MyApp({ Component, pageProps }) {
+
+
+export default function ({ Component, pageProps }) {
+
     return (
-        <>
-            <AppProvider>
+        <Provider store={store}>
+            <LocaleWrapper>
                 <ConfigProvider theme={theme}>
-                    <AntdApp>
-                        <MainLayout>
-                            <Component {...pageProps} />
-                        </MainLayout>
-                    </AntdApp>
-
+                    <Component {...pageProps} />
+                    <LoadingScreen/>
                 </ConfigProvider>
-            </AppProvider>
-
-        </>
-
-)
-    ;
+            </LocaleWrapper>
+        </Provider>
+    )
 }
-
-export default MyApp;

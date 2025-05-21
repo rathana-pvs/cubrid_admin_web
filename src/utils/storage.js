@@ -22,7 +22,7 @@ export const createServerFormat =(server)=>{
     const id = nanoid(8)
     item["key"] = id
     item["title"] = item["name"]
-    item["server_id"] = id
+    item["serverId"] = id
     item["type"] = "server"
     item["icon"] = <i className="fa-light fa-server success"/>
     item["isLeaf"] = false

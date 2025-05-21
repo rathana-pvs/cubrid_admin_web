@@ -1,0 +1,548 @@
+import React, {useEffect, useState} from 'react';
+import {Modal, Tree} from 'antd';
+import axios from "axios";
+import {setToken} from "@/utils/auth";
+import {getAPIParam, isNotEmpty, typeDisplay} from "@/utils/utils";
+import {nanoid} from "nanoid";
+import {useDispatch, useSelector} from "react-redux";
+import {setServer} from "@/state/serverSlice";
+import {setDatabase} from "@/state/databaseSlice";
+import {setBroker, setBrokerStatus} from "@/state/brokerSlice";
+import {setTable} from "@/state/tableSlice";
+import {setView} from "@/state/viewSlice";
+import {setUser} from "@/state/userSlice";
+import {setTrigger} from "@/state/triggerSlice";
+import {setColumn} from "@/state/columnSlice";
+import {setSelectedObject} from "@/state/generalSlice";
+import {setSubServer} from "@/state/subServerSlice";
+import {getBrokerLog, getBrokers, getDatabases} from "@/utils/api";
+import ServerMenu from "@/components/ui/menus/ServerMenu";
+import BrokersMenu from "@/components/ui/menus/BrokersMenu";
+import BrokerMenu from "@/components/ui/menus/BrokerMenu";
+import UsersMenu from "@/components/ui/menus/UsersMenu";
+
+
+function buildTree(...dataSets) {
+    const map = new Map();
+    dataSets.flat().forEach(item => {
+        map.set(item.key, { ...item, children: item.sub?item.sub:[] });
+    });
+    const tree = [];
+    map.forEach((node) => {
+        if (node.parentId) {
+            const parent = map.get(node.parentId);
+            if (parent) parent.children.push(node);
+        } else {
+            tree.push(node);
+        }
+    });
+    return tree;
+}
+
+const contents = [
+    // {type: "server", children: <Servers/>},
+    // {type: "brokers", children: <Brokers/>},
+    // {type: "broker", children: <Broker/>},
+    // {type: "tables", children: <Tables/>},
+    // {type: "views", children: <Views/>},
+    // {type: "serials", children: <Serials/>},
+    // {type: "users", children: <Users/>},
+    // {type: "triggers", children: <Triggers/>},
+    // {type: "synonyms", children: <Synonyms/>}
+]
+const menus = [
+    {type: "server", Screen: ServerMenu},
+    // {type: "databases", Screen: DatabasesMenu},
+    // {type: "database", Screen: DatabaseMenu},
+    // {type: "tables", Screen: TablesMenu},
+    // {type: "views", Screen: ViewsMenu},
+    // {type: "serials", Screen: SerialsMenu},
+    {type: "users", Screen: UsersMenu},
+    // {type: "triggers", Screen: TriggersMenu},
+    // {type: "synonyms", Screen: SynonymsMenu},
+    // {type: "table", Screen: TableMenu},
+    {type: "brokers", Screen: BrokersMenu},
+    {type: "broker", Screen: BrokerMenu}
+]
+
+const App = () => {
+    const {servers, subServers, databases, brokers, tables, views, users, triggers, columns, ...state} = useSelector(state=> state);
+    const dispatch = useDispatch();
+    const [subLogger, setSubLogger] = useState([]);
+    const [subDatabase, setSubDatabase] = useState([]);
+    const [isClient, setIsClient] = useState(false);
+    const [menu, setMenu] = useState({});
+
+    const handleContextMenu = (e) => {
+        const {node} = e
+
+        menus.forEach((item) => {
+            if(item.type === node.type){
+                setMenu({...e, Screen: item.Screen,  open: true});
+            }
+        })
+    };
+    useEffect(() => {
+        setIsClient(true);
+    }, []);
+
+    const onSelect = async (selectedKeys, info) => {
+        const server = servers.find(res=>res.serverId === info.node.serverId);
+        if(selectedKeys.length > 0){
+            dispatch(setSelectedObject({...info.node, server: server}));
+        }else{
+            dispatch(setSelectedObject({}));
+        }
+        // contents.forEach((res) => {
+        //     if(res.type === info.node.type) {
+        //         const checkObject = state.contents.find(item => item.label === info.node.title) || false
+        //         if(checkObject){
+        //             dispatch({type: "PANEL_ACTIVE", payload: checkObject.key});
+        //         }else{
+        //             let key = nanoid(4);
+        //             dispatch({type: "CONTENTS", payload: [...state.contents, {label: info.node.title,
+        //                     ...info.node,
+        //                     ...res,
+        //                     key: key}]})
+        //             dispatch({type: "PANEL_ACTIVE", payload: key})
+        //         }
+        //     }
+        // })
+    };
+    const loadData = async (node) => {
+        const server = servers.find(item => item.serverId === node.serverId)
+        // if (loadedKeys.includes(node.key)) return;
+        switch (node.type) {
+            case "server":{
+                const result = await setToken({...node})
+                if (result.token) {
+
+                    const newServers = servers.map(server => {
+                        if(server.serverId === node.serverId){
+                            return {...server, token: result.token};
+                        }
+                        return server;
+                    })
+                    dispatch(setServer(newServers));
+
+                    const childData = [["Databases", "fa-database"], ["Brokers", "fa-folder-tree"], ["Logs", "fa-files"]]
+
+                    const newSubServer = childData.map(item => {
+                        const id = nanoid(8)
+                        return {
+                            serverId: node.serverId,
+                            parentId: node.key,
+                            type: item[0].toLowerCase(),
+                            title: item[0],
+                            key: id,
+                            icon: <i className={`fa-light ${item[1]}`}/>,
+                            children: [],
+                            isLeaf: false,
+                        }
+                    })
+                    const response = await getBrokers({...getAPIParam({...node, token: result.token})})
+                    if(response.status){
+                            const newBrokers = response.result.map(item => {
+                                return {
+                                    serverId: node.serverId,
+                                    parentId: newSubServer[1].key,
+                                    title: `${item.name} (${item.port})`,
+                                    key: nanoid(8),
+                                    status: item.state,
+                                    name: item.name,
+                                    type: "broker",
+                                    icon: <i className={`fa-light fa-folder-gear ${item.state === "OFF"? "warning": "success"}`}></i>,
+                                    data: item
+                                }
+                            })
+                            newSubServer[1].status = response.brokerstatus
+                            if(response.brokerstatus === "OFF"){
+                                newSubServer[1].icon = <i className={`fa-light fa-folder-tree warning`}/>
+                            }
+
+                            dispatch(setBroker([...brokers, ...newBrokers]))
+                            dispatch(setSubServer([...subServers, ...newSubServer]))
+
+
+                    }
+                }else{
+                    Modal.error({
+                            title: "Connection Failed",
+                            content: response.note,
+                            okText: "Close"
+                        }
+                    )
+                    throw new Error(response.note);
+                }
+
+                break
+            }
+            case "databases":{
+                const response =  await getDatabases(getAPIParam(server));
+                const newDatabases = response.result.map(item => {
+                    const id = nanoid(8)
+                    return {
+                        serverId: node.serverId,
+                        parentId: node.key,
+                        title: item.dbname,
+                        key: id,
+                        type: "database",
+                        status: item.status,
+                        icon: <i className={`fa-light fa-database ${item.status === "inactive" ? "warning" : "success"}`}/>
+                    }
+                })
+                dispatch(setDatabase([...databases, ...newDatabases]));
+                break;
+            }
+
+            case "broker":{
+                const response =  await getBrokerLog({...getAPIParam(server), broker: node.name})
+                if(response.status){
+                    const id = nanoid(8)
+                    const newBrokerLog = {
+                        serverId: node.serverId,
+                        parentId: node.key,
+                        title: "Sql Log",
+                        key: id,
+                        type: "broker_folder_log",
+                        icon: <i className={"fa-solid fa-folder icon__folder"}></i>,
+                        sub: response.result.map(item => {
+                            const name = item.path.split("/").pop()
+                            return {
+                                serverId: node.serverId,
+                                parentId: id,
+                                title: name,
+                                key: nanoid(8),
+                                type: "broker_log",
+                                icon: <i className={"fa-light fa-file"}></i>,
+                                isLeaf: true,
+                                ...item
+                            }
+                        }),
+                    }
+                    dispatch(setBroker([...brokers, newBrokerLog]))
+                }
+                break
+            }
+            case "logs":{
+                const subLog = [
+                    {
+                        parentId: node.key,
+                        title: "Broker",
+                        key: nanoid(8),
+                        type: "broker",
+                        icon: <i className="fa-light fa-folder-tree"></i>,
+                        sub: [
+                            {
+                                serverId: node.serverId,
+                                parentId: node.key,
+                                title: "Access Log",
+                                key: nanoid(8),
+                                type: "folder_admin_log",
+                                icon: <i className="fa-solid fa-folder icon__folder"></i>
+                            },
+                            {
+                                serverId: node.serverId,
+                                parentId: node.key,
+                                title: "Error Log",
+                                key: nanoid(8),
+                                type: "folder_admin_log",
+                                icon: <i className="fa-solid fa-folder icon__folder"></i>
+                            },
+                            {
+                                serverId: node.serverId,
+                                parentId: node.key,
+                                title: "Admin Log",
+                                key: nanoid(8),
+                                type: "folder_admin_log",
+                                icon: <i className="fa-solid fa-folder icon__folder"></i>
+                            }
+                        ]
+                    },
+                    {
+                        serverId: node.serverId,
+                        parentId: node.key,
+                        title: "Manager",
+                        key: nanoid(8),
+                        type: "manager",
+                        icon: <i className="fa-light fa-computer"></i>,
+                        sub: [
+                            {
+                                serverId: node.serverId,
+                                parentId: node.key,
+                                title: "Access Log",
+                                key: nanoid(8),
+                                type: "access_log",
+                                icon: <i className="fa-solid fa-file"></i>,
+                                isLeaf:true
+
+                            },
+                            {
+                                serverId: node.serverId,
+                                parentId: node.key,
+                                title: "Error Log",
+                                key: nanoid(8),
+                                type: "error_log",
+                                icon: <i className="fa-solid fa-file error"></i>,
+                                isLeaf: true,
+                            }
+                        ]
+                    },
+                    {
+                        serverId: node.serverId,
+                        parentId: node.key,
+                        title: "Server",
+                        key: nanoid(8),
+                        type: "log_server",
+                        icon: <i className="fa-light fa-server"></i>,
+                        sub: []
+                    }
+                ]
+                setSubLogger(subLog)
+                break;
+            }
+            case "database":{
+                const childData = [["Tables", "fa-table-tree"], ["Views", "fa-eye"],
+                    ["Serials", "fa-input-numeric", {disabled: true, isLeaf:false}], ["Users", "fa-users"],
+                    ["Triggers", "fa-gears"], ["Stored Procedure", "fa-table-list", {disabled: true, isLeaf: false}]]
+
+                    const subDatabase = childData.map(item => {
+                        const id = nanoid(8)
+                        return {
+                            serverId: node.serverId,
+                            id: id,
+                            parentId: node.key,
+                            title: item[0],
+                            key: `${node.key}-${id}`,
+                            type: item[0].toLowerCase(),
+                            icon: <i className={`fa-light ${item[1]}`}/>,
+                            children: [],
+                            isLeaf: false,
+                            ...item[2]
+
+                        }
+                    })
+                    
+                    setSubDatabase([...subDatabase, ...subDatabase])
+                    break;
+            }
+            case "tables":{
+                const server = servers.find(item => item.serverId === node.serverId)
+                const database = databases.find(item => item.key === node.parentId)
+                let allClass = []
+                const {result} = await axios.post("/api/list-tables", {...getAPIParam(server), database: database.title, virtual: "normal" })
+                    .then(res => res.data);
+                const systemId = nanoid(8)
+                allClass.push({
+                    serverId: node.serverId,
+                    parentId: node.key,
+                    title: "System Tables",
+                    key: `${node.key}-${systemId}`,
+                    type: "system-table",
+                    icon: <i className="fa-solid fa-folder icon__folder"/>,
+                    sub: result.system_class.map((item) => ({
+                            serverId: node.serverId,
+                            databaseId: node.parentId,
+                            parentId: node.key,
+                            title: item.classname,
+                            key: `${node.key}-${nanoid(8)}`,
+                            type: "table",
+                            icon: <i className="fa-light fa-table"/>,
+                            isLeaf: true,
+                            ...item
+                    })),
+                })
+                result.user_class.forEach(item=>{
+                        allClass.push({
+                            serverId: node.serverId,
+                            databaseId: node.parentId,
+                            parentId: node.key,
+                            title: `${item.classname}`,
+                            key: `${node.key}-${nanoid(8)}`,
+                            type: "table",
+                            icon: <i className="fa-light fa-table"/>,
+                            ...item
+                        })
+                })
+                // dispatch({type: "TABLES", payload: [...state.tables, ...allClass]})
+                dispatch(setTable([...tables, ...allClass]))
+
+                break;
+            }
+            case "views":{
+                const server = servers.find(item => item.serverId === node.serverId)
+                const database = databases.find(item => item.key === node.parentId)
+                let allView = []
+                const {result} = await axios.post("/api/list-tables",
+                    {...getAPIParam(server), database: database.title, virtual: "view" })
+                    .then(res => res.data);
+                const viewId = nanoid(8)
+                allView.push({
+                    serverId: node.serverId,
+                    parentId: node.key,
+                    title: "System Views",
+                    key: `${node.key}-${viewId}`,
+                    type: "system-view",
+                    icon: <i className="fa-solid fa-folder icon__folder"/>,
+                    sub: result.system_class.map((item) => ({
+                        serverId: node.serverId,
+                        parentId: `${node.key}-${viewId}`,
+                        id: nanoid(8),
+                        title: item.classname,
+                        key: `${node.key}-${viewId}-${nanoid(8)}`,
+                        type: "system-view",
+                        icon: <i className="fa-light fa-eye"/>,
+                        isLeaf: true,
+                        ...item
+                    })),
+                })
+                result.user_class.forEach(item=>{
+                        allView.push({
+                            serverId: node.serverId,
+                            databaseId: node.parentId,
+                            parentId: node.key,
+                            title: `${item.classname}`,
+                            key: `${node.key}-${nanoid(8)}`,
+                            type: "view",
+                            icon: <i className="fa-light fa-eye"/>,
+                            ...item
+                        })
+                })
+                dispatch(setView([...views, ...allView]))
+                break
+            }
+            case "users":{
+                const server = servers.find(item => item.serverId === node.serverId)
+                const database = databases.find(item => item.key === node.parentId)
+                const {result} = await axios.post("/api/list-users", {...getAPIParam(server), database: database.title})
+                    .then(res => res.data);
+                const newUser = result.map(item=>{
+                    return {
+                        serverId: node.serverId,
+                        parentId: node.key,
+                        title: item["@name"],
+                        key: `${node.key}-${nanoid(8)}`,
+                        type: "user",
+                        icon: <i className="fa-light fa-user success"/>,
+                        isLeaf: true,
+                        ...item
+                    }
+                })
+                dispatch(setUser([...users, ...newUser]))
+                break
+            }
+            case "triggers":{
+                const server = servers.find(item => item.serverId === node.serverId)
+                const database = databases.find(item => item.key === node.parentId)
+                const response = await axios.post("/api/list-triggers", {...getAPIParam(server), database: database.title})
+                    .then(res => res.data);
+                if(response.success){
+                    const newTrigger = response.result.map(item=>{
+                        return {
+                            serverId: node.serverId,
+                            parentId: node.key,
+                            title: `${item.name}`,
+                            key: `${node.key}-${nanoid(8)}`,
+                            type: "trigger",
+                            icon: <i className="fa-light fa-gear-code"></i>,
+                            isLeaf: true,
+                            ...item
+                        }
+                    })
+                    dispatch(setTrigger([...triggers, ...newTrigger]))
+                }else{
+                    Modal.error({
+                            title: "Trigger Error",
+                            content: response.note,
+                            okText: "Close"
+                        }
+                    )
+                    throw new Error(response.note);
+
+                }
+
+                break
+            }
+            case "table":{
+                const server = servers.find(item => item.serverId === node.serverId)
+                const database = databases.find(item => item.key === node.databaseId)
+
+                const response = await axios.post("/api/table-info",
+                    {...getAPIParam(server), database: database.title, table: node.title})
+                    .then(res => res.data)
+                const {attribute, constraint} = response.result
+                let columnIndex = []
+
+                columnIndex.push({
+                    parentId: node.key,
+                    title: "Columns",
+                    key: nanoid(8),
+                    icon: <i className="fa-solid fa-folder icon__folder"/>,
+                    sub: attribute.map(item=>({
+                        serverId: node.serverId,
+                        databaseId: node.databaseId,
+                        parentId: node.key,
+                        key: `${node.key}-${nanoid(8)}`,
+                        title: `${item.name} (${typeDisplay(item.type)})`,
+                        type: "column",
+                        icon: <i className="fa-light fa-columns-3"/>,
+                        isLeaf: true,
+                        ...item
+                    }))
+                })
+                //
+                columnIndex.push({
+                    parentId: node.key,
+                    title: "Indexes",
+                    key: nanoid(8),
+                    icon: <i className="fa-solid fa-folder icon__folder"/>,
+                    sub: constraint.map(item=>({
+                        serverId: node.serverId,
+                        databaseId: node.databaseId,
+                        parentId: node.key,
+                        key: `${node.key}-${nanoid(8)}`,
+                        title: item.name,
+                        type: "index",
+                        icon: <i className="fa-light fa-columns-3"/>,
+                        isLeaf: true,
+                        ...item
+                    }))
+                })
+                dispatch(setColumn([...columns, ...columnIndex]))
+                break
+            }
+
+
+        }
+
+    }
+
+
+    const renderManu = ()=>{
+        const {Screen, open, ...e} = menu
+        if(Screen){
+            return <Screen {...e} open={open} onClose={()=>setMenu({...menu, open: false})}/>
+        }
+        return null
+
+    }
+    if (!isClient) return null;
+
+
+    return (
+            <>
+                {renderManu()}
+                <Tree
+                    onRightClick={handleContextMenu}
+                    showLine
+                    showIcon
+                    loadData={loadData}
+                    onSelect={onSelect}
+                    treeData={buildTree(servers, subServers, databases,
+                        brokers, subLogger, subDatabase, tables, views, users, triggers, columns)}
+
+                />
+            </>
+    );
+};
+export default App;

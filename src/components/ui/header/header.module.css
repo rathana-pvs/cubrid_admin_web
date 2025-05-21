@@ -12,7 +12,7 @@
 .layout__menu{
     display: flex;
     flex-direction: row;
-    gap: 4px;
+    gap: 8px;
 
 }
 .dropdown__menu{

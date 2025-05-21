@@ -3,7 +3,8 @@ import axios from 'axios';
 import https from "https";
 
 const agent = new https.Agent({
-    rejectUnauthorized: false // Bypass SSL validation (only for testing)
+    rejectUnauthorized: false,
+
 });
 // Create Axios instance with the custom HTTPS agent
 const axiosInstance = axios.create({

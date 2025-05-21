@@ -1,4 +1,3 @@
-import {createConnection, query} from "@/lib/odbc-cubrid";
 import axiosInstance from "@/lib/agent";
 import {isNotEmpty} from "@/utils/utils";
 

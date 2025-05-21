@@ -1,9 +1,0 @@
-.layout{
-    display: flex;
-    justify-content: center;
-}
-.layout__wrapper{
-    max-width: 1200px;
-    padding: 24px 0;
-    width: 80%;
-}

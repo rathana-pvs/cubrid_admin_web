@@ -1,0 +1,22 @@
+.modal{
+    min-width: 580px !important;
+}
+
+.timeout__select{
+    width: 100% !important;
+    flex: 1 !important;
+
+}
+.action{
+    width: 100% !important;
+    display: flex;
+    justify-content: flex-end;
+    gap: 20px;
+
+}
+.action button{
+    min-width: 100px !important;
+}
+.selected__row {
+    background-color: color-mix(in srgb, var(--primary-color) 10%, transparent) !important;
+}

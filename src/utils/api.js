@@ -1,47 +1,86 @@
-import axios from "axios";
+import request from "@/utils/request";
+import {Modal} from "antd";
 
 
-// Create an Axios instance
-const api = axios.create({
-    timeout: 5000, // Optional timeout (10s)
-});
-
-api.interceptors.response.use(
-    (response) => response, // If request is successful, just return response
-    (error) => {
-        if (error.response) {
-            // Server responded with an error status
-            switch (error.response.status) {
-                case 400:
-                    console.error("🚨 Bad Request:", error.response.data);
-                    break;
-                case 401:
-                    console.error("🔒 Unauthorized: Please log in again.");
-                    // Optional: Redirect to login page
-                    break;
-                case 403:
-                    console.error("⛔ Forbidden: You don't have permission.");
-                    break;
-                case 404:
-                    console.error("❌ Not Found: Resource does not exist.");
-                    break;
-                case 500:
-                    console.error("💥 Server Error: Please try again later.");
-                    break;
-                default:
-                    console.error(`⚠️ Error ${error.response.status}:`, error.response.data);
-            }
-        } else if (error.request) {
-            // No response from server
-            console.error("📡 No response from server. Check your connection.");
-        } else {
-            // Other errors
-            console.error("❗ Request error:", error.message);
-        }
-
-        // Always reject the promise to allow further error handling in components
-        return Promise.reject(error);
+const getResponse = (response) => {
+    if(!response.status){
+        Modal.error({
+            title: 'Error',
+            content: response.note,
+            okText: 'Close',
+        });
     }
-);
+    return response;
+}
 
-export default api;
+export const getDatabases = async (data) => {
+    const response = await request.post("/api/get-databases", data).then(res => res.data);
+    return getResponse(response);
+}
+
+export const getBrokers = async (data) => {
+    const response = await request.post("/api/get-brokers", data).then(res => res.data);
+    return getResponse(response);
+}
+
+
+export const startDatabase = async (data) => {
+    const response = await request.post("/api/start-db", data).then(res => res.data);
+    return getResponse(response);
+}
+
+export const stopDatabase = async (data) => {
+    const response = await request.post("/api/stop-db", data).then(res => res.data);
+    return getResponse(response);
+}
+
+export const startBrokers = async (data) => {
+    const response = await request.post("/api/start-brokers", data).then(res => res.data);
+    return getResponse(response);
+}
+
+export const stopBrokers = async (data) => {
+    const response = await request.post("/api/stop-brokers", data).then(res => res.data);
+    return getResponse(response);
+}
+
+export const startBroker = async (data) => {
+    const response = await request.post("/api/start-broker", data).then(res => res.data);
+    return getResponse(response);
+}
+export const stopBroker = async (data) => {
+    const response = await request.post("/api/stop-broker", data).then(res => res.data);
+    return getResponse(response);
+}
+
+export const getBrokerLog = async (data) => {
+    const response = await request.post("/api/get-broker-log", data).then(res => res.data);
+    return getResponse(response);
+}
+
+
+export const getCMUsers = async (data) => {
+    const response = await request.post("/api/get-cm-users", data).then(res => res.data);
+    return getResponse(response);
+}
+
+export const createCMUser = async (data) => {
+    const response = await request.post("/api/create-cm-user", data).then(res => res.data);
+    return getResponse(response);
+}
+
+
+export const updateCMUser = async (data) => {
+    const response = await request.post("/api/update-cm-user", data).then(res => res.data);
+    return getResponse(response);
+}
+
+export const deleteCMUser = async (data) => {
+    const response = await request.post("/api/delete-cm-user", data).then(res => res.data);
+    return getResponse(response);
+}
+
+export const createUserDB = async (data) => {
+    const response = await request.post("/api/create-db-user", data).then(res => res.data);
+    return getResponse(response);
+}
