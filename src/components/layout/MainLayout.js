@@ -13,6 +13,7 @@ import CreateUserDB from "@/components/ui/dialogs/CreateUserDB";
 import LoginDatabase from "@/components/ui/dialogs/LoginDatabase";
 import CompactDB from "@/components/ui/dialogs/CompactDB";
 import CheckDB from "@/components/ui/dialogs/CheckDB";
+import BackupDB from "@/components/ui/dialogs/BackupDB";
 
 
 export default function (props) {
@@ -45,6 +46,7 @@ export default function (props) {
                 <LoginDatabase/>
                 <CompactDB/>
                 <CheckDB/>
+                <BackupDB/>
                 {/*<DBLogin/>*/}
                 {/*<LoadingScreen/>*/}
                 {/*<CreateDatabase/>*/}

@@ -1,68 +1,82 @@
 import React, {useEffect, useState} from 'react';
-import {Button,  Col, Form, Input,  Modal, Row} from "antd";
+import {Button, Checkbox, Col, Form, Input, Modal, Row, Select} from "antd";
 import {useDispatch, useSelector} from "react-redux";
 import styles from '@/components/ui/dialogs/dialog.module.css'
-
-
-
-
-
-
-
-
+import {getBackupDB} from "@/utils/api";
+import {getAPIParam} from "@/utils/utils";
+import {setBackupDB, setLoading} from "@/state/dialogSlice";
 
 export default function () {
     const {backupDB} = useSelector(state => state.dialog);
     const {servers} = useSelector(state => state);
     const dispatch = useDispatch();
     const [form] = Form.useForm();
-    const [action, setAction] = useState("")
+    const [checkBoxFields, setCheckBoxFields ] = useState({
+        zip: true,
+        removelog: false,
+        check: true,
+
+    });
 
 
-
-    const handleSubmit = (values) => {
+    const handleSubmit = () => {
 
         form.validateFields().then(async (values) => {
             const server = servers.find(res=>res.serverId === backupDB.node.serverId);
-            
+            const {zip, removelog, check} = checkBoxFields;
+            const data = {
+                ...values,
+                zip: zip ? 'y': 'n',
+                removelog: removelog? 'y': 'n',
+                check: check ? 'y' : 'n',
+            };
+            dispatch(setLoading(true));
+            const response = await getBackupDB({...getAPIParam(server), ...data});
 
-        //     if(response.status){
-        //         if(action === "test"){
-        //             Modal.success({
-        //                 title: 'Success',
-        //                 content: "Successfully logged in",
-        //                 okText: "Close"
-        //             })
-        //         }else{
-        //
-        //             handleClose()
-        //         }
-        //     }else{
-        //         Modal.error({
-        //             title: 'Error',
-        //             content: response.note,
-        //             okText: "Close"
-        //         })
-        //     }
+            dispatch(setLoading(false));
+
+            if(response.status){
+                Modal.success({
+                    title: 'Success',
+                    content: "Database Backup has been completed successfully",
+                    okText: "Close"
+                })
+                handleClose()
+            }else{
+                Modal.error({
+                    title: 'Error',
+                    content: response.note,
+                    okText: "Close"
+                })
+            }
         })
 
 
 
     }
 
-    const onAction = (name) => {
-        setAction(name);
+    function handleClose() {
+        dispatch(setBackupDB({open: false}));
+        form.resetFields();
     }
 
-    function handleClose() {
-        // dispatch(setLoginDB({...backupDB, open: false}));
-        form.resetFields();
+    const handleCheckBox = (e)=>{
+        const {name, checked} = e.target;
+        setCheckBoxFields(prevState => ({...prevState, [name]: checked}));
     }
 
     useEffect(()=>{
         if(backupDB.open){
             const {node} = backupDB;
             const server = servers.find(res=>res.serverId === node.serverId);
+            const dbName = backupDB.node.title
+            form.setFieldsValue({
+                dbname: dbName,
+                volname: `${dbName}_backup_lv0`,
+                backupdir: `/var/lib/cubrid/${dbName}/backup`,
+                level: "0",
+                mt: 0
+            })
 
         }
 
@@ -73,48 +87,77 @@ export default function () {
             <Modal closeIcon={null} title="Backup Database" maskClosable={false} open={backupDB.open} onOk={() => handleClose(true)}
                    onCancel={() => handleClose(false)} footer={null} centered={true}>
 
-                <Form form={form} onFinish={handleSubmit} autoComplete="off" layout="vertical">
+                <Form form={form} onFinish={handleSubmit} autoComplete="off" layout="horizontal">
                     <Row gutter={[12, 6]}>
-                        <Col span={18}>
+                        <Col span={24}>
                             <Form.Item
-                                label="Host"
-                                name="host"
+                                label="Database"
+                                name="dbname"
+                                labelCol={{span: 6}}
                             >
                                 <Input readOnly/>
                             </Form.Item>
                         </Col>
-                        <Col span={6}>
+                        <Col span={24}>
                             <Form.Item
-                                label="Port"
-                                name="port"
+                                label="Vol Path"
+                                name="volname"
+                                labelCol={{span: 6}}
+                                rules={[{required: true, message: "Required"}]}
+                            >
+                                <Input placeholder="Enter Vol Path"/>
+                            </Form.Item>
+                        </Col>
+                        <Col span={24}>
+                            <Form.Item
+                                label="Backup Level"
+                                name="level"
+                                labelCol={{span: 6}}
+                            >
+                                <Input />
+                            </Form.Item>
+                        </Col>
+
+                        <Col span={24}>
+                            <Form.Item
+                                label="Backup Level"
+                                name="level"
+                                labelCol={{span: 6}}
+                            >
+                                <Select>
+                                    <Option value="0">level 0</Option>
+                                </Select>
+                            </Form.Item>
+                        </Col>
+                        <Col span={24}>
+                            <Form.Item
+                                label="Backup Directory"
+                                name="backupdir"
+                                labelCol={{span: 6}}
+                                rules={[{required: true, message: "Required"}]}
                             >
                                 <Input/>
                             </Form.Item>
                         </Col>
+
                         <Col span={24}>
                             <Form.Item
-                                label="Database"
-                                name="database"
+                                label="Parallel Backup"
+                                name="mt"
+                                labelCol={{span: 6}}
                             >
-                                <Input readOnly />
+                                <Input type="number"/>
                             </Form.Item>
                         </Col>
-                        <Col span={24}>
-                            <Form.Item
-                                label="DB Username"
-                                name="username"
-                                rules={[{required: true, message: "Required"}]}
-                            >
-                                <Input placeholder="Enter DB Username"/>
-                            </Form.Item>
-                        </Col>
-                        <Col span={24}>
-                            <Form.Item
-                                label="DB Password"
-                                name="password"
-                            >
-                                <Input.Password placeholder="Enter password"/>
-                            </Form.Item>
+                        <Col span={18}>
+                            <Checkbox name="check" checked={checkBoxFields.check}
+                                      onChange={handleCheckBox}>Check Database Consistency</Checkbox>
+                            <br/>
+                            <Checkbox name="removelog" checked={checkBoxFields.removelog}
+                                      onChange={handleCheckBox}>Delete Unnecessary log-achieves</Checkbox>
+                            <br/>
+                            <Checkbox name="zip" checked={checkBoxFields.zip}
+                                      onChange={handleCheckBox}>Compress Backup Volumes</Checkbox>
                         </Col>
 
                         <Col span={24} style={{marginTop:24}}>
@@ -123,8 +166,8 @@ export default function () {
 
                                     <Col>
                                         <Button className={"button button__primary button__small"}
-                                                htmlType="submit" onClick={()=>onAction("save")}>
-                                            Save
+                                                htmlType="submit">
+                                            Backup
                                         </Button>
                                     </Col>
                                     <Col>

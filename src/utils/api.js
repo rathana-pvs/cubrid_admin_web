@@ -115,3 +115,9 @@ export const getCheckDB = async (data) => {
     const response = await request.post("/api/check-db", data).then(res => res.data);
     return getResponse(response);
 }
+
+export const getBackupDB = async (data) => {
+    const response = await request.post("/api/backup-db", data).then(res => res.data);
+    return getResponse(response);
+}
+

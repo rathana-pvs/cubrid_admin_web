@@ -4,7 +4,7 @@ import {
 } from "@ant-design/icons";
 import {nanoid} from "nanoid";
 import {useDispatch} from "react-redux";
-import {setCheckDB, setCompactDB} from "@/state/dialogSlice";
+import {setBackupDB, setCheckDB, setCompactDB} from "@/state/dialogSlice";
 
 export default function({node, event, open, onClose}) {
 
@@ -188,7 +188,9 @@ export default function({node, event, open, onClose}) {
                 {
                     label: "Backup Database",
                     key: nanoid(4),
-                    disabled: true
+                    onClick: ()=>{
+                        dispatch(setBackupDB({open: true, node}));
+                    }
                 },
                 {
                     label: "Restore Unload",
