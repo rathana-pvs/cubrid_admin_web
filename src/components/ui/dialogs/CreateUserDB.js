@@ -1,51 +1,77 @@
-import React, { useState } from "react";
-import { Modal, Form, Input, Select, Button } from "antd";
+import React, {useEffect} from "react";
+import { Modal, Form, Input, Select} from "antd";
 import {useDispatch, useSelector} from "react-redux";
-import {setUserDB} from "@/state/dialogSlice";
-import {createUserDB} from "@/utils/api";
-import {getAPIParam} from "@/utils/utils";
+import {setLoading, setUserDB} from "@/state/dialogSlice";
+import {createUserDB, updateUserDB} from "@/utils/api";
+import {getAPIParam, isNotEmpty} from "@/utils/utils";
 import {setUser} from "@/state/userSlice";
 import {nanoid} from "nanoid";
 
 const { Option } = Select;
 const { TextArea } = Input;
-const dbOptions = [
-    { label: "main_db", value: "main_db" },
-    { label: "test_db", value: "test_db" },
-];
 
-const groupOptions = [
-    { label: "admin", value: "admin" },
-    { label: "read_only", value: "read_only" },
-];
 const CreateUserDB = () => {
     const state = useSelector(state=>state)
-    const {userDB} = state.dialog
+    const {userDB, loginDB} = state.dialog
     const {databases, users} = state;
     const dispatch = useDispatch();
     const [form] = Form.useForm();
 
     const handleOk = () => {
         const server = state.servers.find(res=>res.serverId === userDB.node.serverId);
-        form
-            .validateFields()
+        form.validateFields()
             .then(async (values) => {
-                // form.resetFields();
-                const response = await createUserDB({...getAPIParam(server), ...values});
-                if(response.status){
-                    dispatch(setUser([...users,  {
-                        serverId: userDB.node.serverId,
-                        parentId: userDB.node.key,
-                        title: values.username,
-                        key: `${userDB.node.key}-${nanoid(8)}`,
-                        type: "user",
-                        icon: <i className="fa-light fa-user success"/>,
-                        isLeaf: true,
-                        ...values
-                    }]))
+                dispatch(setLoading(true))
+                let response = {}
+                const data = {...getAPIParam(server), ...values, groups: values.groups}
+                if(userDB.type === "add"){
+                    response = await createUserDB(data);
+                    if(response.status){
+                        handleClose()
+                        dispatch(setUser([...users,  {
+                            serverId: userDB.node.serverId,
+                            parentId: userDB.node.key,
+                            title: values.username,
+                            key: `${userDB.node.key}-${nanoid(8)}`,
+                            type: "user",
+                            icon: <i className="fa-light fa-user success"/>,
+                            isLeaf: true,
+                            ...values
+                        }]))
+                }else {
+                        Modal.error({
+                            title: 'Error',
+                            content: response.note,
+                            okText: "Close"
+                        })
                 }
 
+                }else{
 
+                    response = await updateUserDB(data);
+
+                    if(response.status){
+                        handleClose()
+                        dispatch(setUser(users.map(res=>{
+                            if(res.key === userDB.node.key){
+                                const user = {...userDB.node, ...values, groups: [{group: values.groups}]}
+                                setUserDB({...userDB, node: user});
+                                return user
+
+                            }
+                            return res
+                        })))
+                    }else{
+                        Modal.error({
+                            title: 'Error',
+                            content: response.note,
+                            okText: "Close"
+                        })
+                    }
+
+                }
+
+                dispatch(setLoading(false))
             })
             .catch((info) => {
                 console.log("Validate Failed:", info);
@@ -55,6 +81,21 @@ const CreateUserDB = () => {
     const handleClose = () => {
         dispatch(setUserDB({open: false}));
     }
+
+    useEffect(() => {
+        if(userDB.open){
+            if(userDB.type === "edit"){
+                console.log(userDB.node)
+                form.setFieldsValue({
+                    dbname: loginDB.node.title,
+                    username: userDB.node.title,
+                    groups: isNotEmpty(userDB.node.groups)? userDB.node.groups[0].group: [],
+
+                })
+            }
+
+        }
+    }, [userDB]);
 
     return (
         <Modal
@@ -69,9 +110,9 @@ const CreateUserDB = () => {
                 <Form.Item
                     name="dbname"
                     label="Database"
-                    rules={[{ required: true, message: "Please select a database" }]}
+
                 >
-                    <Select placeholder="Select a database">
+                    <Select placeholder="Select a database" open={false}>
                         {databases.map((db) => (
                             <Option key={db.key} value={db.title}>
                                 {db.title}
@@ -85,7 +126,7 @@ const CreateUserDB = () => {
                     label="Username"
                     rules={[{ required: true, message: "Please enter a username" }]}
                 >
-                    <Input placeholder="Enter username" />
+                    <Input placeholder="Enter username" readOnly={userDB.type === "edit"}/>
                 </Form.Item>
 
                 <Form.Item
@@ -128,11 +169,13 @@ const CreateUserDB = () => {
                         allowClear
                         placeholder="Select user groups"
                     >
-                        {users.map((res) => (
-                            <Option key={res.key} value={res.title}>
-                                {res.title}
-                            </Option>
-                        ))}
+                        {
+                            users.filter(res=>res.title !== userDB.node?.title).map(res=>(
+                                (<Option key={res.key} value={res.title}>
+                                    {res.title}
+                                </Option>)
+                            ))
+                        }
                     </Select>
                 </Form.Item>
             </Form>

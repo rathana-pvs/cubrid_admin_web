@@ -11,12 +11,11 @@ export default async function handler(req, res) {
             const { host, port, token, ...data} = req.body;
             const response = await axiosInstance.post(`https://${host}:${port}/cm_api`, {
                 ...data,
-                task: "createuser",
+                task: "viewlog",
                 token
             }).then(res=>res.data)
             if(response.status === "success"){
-
-                res.status(200).json({status:true})
+                res.status(200).json({result: response.log?.[0].line, status:true})
             }else{
                 res.status(200).json({...response, status:false})
             }

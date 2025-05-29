@@ -181,7 +181,7 @@ const EditableUserTable = () => {
                            </Button>
                            <Button type={"primary"} variant={"filled"} className={"button button__small"}
                                    onClick={() => handleClose()}>
-                               Cancel
+                               Close
                            </Button>
                        </>
                    )
@@ -255,7 +255,10 @@ const EditableUserTable = () => {
                         label="DB Creation Authority"
                         rules={[{required: true, message: 'Please select a value'}]}
                     >
-                        <Select>{authorityOptions}</Select>
+                        <Select>
+                            <option value={"none"}>none</option>
+                            <option value={"admin"}>admin</option>
+                        </Select>
                     </Form.Item>
 
                     <Form.Item

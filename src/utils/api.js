@@ -13,6 +13,11 @@ const getResponse = (response) => {
     return response;
 }
 
+
+export const loginDatabase = async (data) => {
+    const response = await request.post("/api/login-database", data).then(res => res.data);
+    return getResponse(response);
+}
 export const getDatabases = async (data) => {
     const response = await request.post("/api/get-databases", data).then(res => res.data);
     return getResponse(response);
@@ -82,5 +87,31 @@ export const deleteCMUser = async (data) => {
 
 export const createUserDB = async (data) => {
     const response = await request.post("/api/create-db-user", data).then(res => res.data);
+    return getResponse(response);
+}
+
+export const updateUserDB = async (data) => {
+    const response = await request.post("/api/update-db-user", data).then(res => res.data);
+    return getResponse(response);
+}
+
+export const deleteUserDB = async (data) => {
+    const response = await request.post("/api/delete-db-user", data).then(res => res.data);
+    return getResponse(response);
+}
+
+export const viewLog = async (data) => {
+    const response = await request.post("/api/view-log", data).then(res => res.data);
+    return getResponse(response);
+}
+
+
+export const getCompactDB = async (data) => {
+    const response = await request.post("/api/compact-db", data).then(res => res.data);
+    return getResponse(response);
+}
+
+export const getCheckDB = async (data) => {
+    const response = await request.post("/api/check-db", data).then(res => res.data);
     return getResponse(response);
 }

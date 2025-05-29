@@ -10,6 +10,9 @@ import SideNavigation from "@/components/layout/side-navigation/SideNavigation";
 import NewConnection from "@/components/ui/dialogs/NewConnection";
 import UserManagement from "@/components/ui/dialogs/user-management/UserManagement";
 import CreateUserDB from "@/components/ui/dialogs/CreateUserDB";
+import LoginDatabase from "@/components/ui/dialogs/LoginDatabase";
+import CompactDB from "@/components/ui/dialogs/CompactDB";
+import CheckDB from "@/components/ui/dialogs/CheckDB";
 
 
 export default function (props) {
@@ -39,6 +42,9 @@ export default function (props) {
                 <NewConnection/>
                 <UserManagement/>
                 <CreateUserDB/>
+                <LoginDatabase/>
+                <CompactDB/>
+                <CheckDB/>
                 {/*<DBLogin/>*/}
                 {/*<LoadingScreen/>*/}
                 {/*<CreateDatabase/>*/}

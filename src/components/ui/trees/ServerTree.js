@@ -13,13 +13,17 @@ import {setView} from "@/state/viewSlice";
 import {setUser} from "@/state/userSlice";
 import {setTrigger} from "@/state/triggerSlice";
 import {setColumn} from "@/state/columnSlice";
-import {setSelectedObject} from "@/state/generalSlice";
+import {addContents, setActivePanel, setSelectedObject} from "@/state/generalSlice";
 import {setSubServer} from "@/state/subServerSlice";
 import {getBrokerLog, getBrokers, getDatabases} from "@/utils/api";
 import ServerMenu from "@/components/ui/menus/ServerMenu";
 import BrokersMenu from "@/components/ui/menus/BrokersMenu";
 import BrokerMenu from "@/components/ui/menus/BrokerMenu";
 import UsersMenu from "@/components/ui/menus/UsersMenu";
+import {setLoginDB} from "@/state/dialogSlice";
+import UserMenu from "@/components/ui/menus/UserMenu";
+import ViewSQLLog from "@/components/ui/contents/broker/ViewSQLLog";
+import DatabaseMenu from "@/components/ui/menus/DatabaseMenu";
 
 
 function buildTree(...dataSets) {
@@ -50,14 +54,19 @@ const contents = [
     // {type: "triggers", children: <Triggers/>},
     // {type: "synonyms", children: <Synonyms/>}
 ]
+
+const panels = [
+    {type: "broker_log_file", children: <ViewSQLLog/>}
+]
 const menus = [
     {type: "server", Screen: ServerMenu},
     // {type: "databases", Screen: DatabasesMenu},
-    // {type: "database", Screen: DatabaseMenu},
+    {type: "database", Screen: DatabaseMenu},
     // {type: "tables", Screen: TablesMenu},
     // {type: "views", Screen: ViewsMenu},
     // {type: "serials", Screen: SerialsMenu},
     {type: "users", Screen: UsersMenu},
+    {type: "user", Screen: UserMenu},
     // {type: "triggers", Screen: TriggersMenu},
     // {type: "synonyms", Screen: SynonymsMenu},
     // {type: "table", Screen: TableMenu},
@@ -67,6 +76,7 @@ const menus = [
 
 const App = () => {
     const {servers, subServers, databases, brokers, tables, views, users, triggers, columns, ...state} = useSelector(state=> state);
+    const {contents} = useSelector(state=> state.general);
     const dispatch = useDispatch();
     const [subLogger, setSubLogger] = useState([]);
     const [subDatabase, setSubDatabase] = useState([]);
@@ -93,21 +103,17 @@ const App = () => {
         }else{
             dispatch(setSelectedObject({}));
         }
-        // contents.forEach((res) => {
-        //     if(res.type === info.node.type) {
-        //         const checkObject = state.contents.find(item => item.label === info.node.title) || false
-        //         if(checkObject){
-        //             dispatch({type: "PANEL_ACTIVE", payload: checkObject.key});
-        //         }else{
-        //             let key = nanoid(4);
-        //             dispatch({type: "CONTENTS", payload: [...state.contents, {label: info.node.title,
-        //                     ...info.node,
-        //                     ...res,
-        //                     key: key}]})
-        //             dispatch({type: "PANEL_ACTIVE", payload: key})
-        //         }
-        //     }
-        // })
+        panels.forEach((res) => {
+            if(res.type === info.node.type) {
+                const checkObject = contents.find(item => item.key === info.node.key) || false
+                if(!checkObject){
+                    dispatch(addContents({label: info.node.title,
+                        ...info.node,
+                        ...res}))
+                }
+                dispatch(setActivePanel(info.node.key))
+            }
+        })
     };
     const loadData = async (node) => {
         const server = servers.find(item => item.serverId === node.serverId)
@@ -187,6 +193,7 @@ const App = () => {
                         title: item.dbname,
                         key: id,
                         type: "database",
+                        isLogin: false,
                         status: item.status,
                         icon: <i className={`fa-light fa-database ${item.status === "inactive" ? "warning" : "success"}`}/>
                     }
@@ -206,14 +213,14 @@ const App = () => {
                         key: id,
                         type: "broker_folder_log",
                         icon: <i className={"fa-solid fa-folder icon__folder"}></i>,
-                        sub: response.result.map(item => {
+                        sub: response.result.filter(res=>!res.type).map(item => {
                             const name = item.path.split("/").pop()
                             return {
                                 serverId: node.serverId,
                                 parentId: id,
                                 title: name,
                                 key: nanoid(8),
-                                type: "broker_log",
+                                type: "broker_log_file",
                                 icon: <i className={"fa-light fa-file"}></i>,
                                 isLeaf: true,
                                 ...item
@@ -302,11 +309,16 @@ const App = () => {
                 break;
             }
             case "database":{
-                const childData = [["Tables", "fa-table-tree"], ["Views", "fa-eye"],
-                    ["Serials", "fa-input-numeric", {disabled: true, isLeaf:false}], ["Users", "fa-users"],
-                    ["Triggers", "fa-gears"], ["Stored Procedure", "fa-table-list", {disabled: true, isLeaf: false}]]
+                if(!node.isLogin){
+                    dispatch(setLoginDB({open: true, type: "login", node}))
+                    throw new Error("Keep loading");
+                }
+                if(node.isLogin){
+                    const childData = [["Tables", "fa-table-tree"], ["Views", "fa-eye"],
+                        ["Serials", "fa-input-numeric", {disabled: true, isLeaf:false}], ["Users", "fa-users"],
+                        ["Triggers", "fa-gears"], ["Stored Procedure", "fa-table-list", {disabled: true, isLeaf: false}]]
 
-                    const subDatabase = childData.map(item => {
+                    const newSubDatabase = childData.map(item => {
                         const id = nanoid(8)
                         return {
                             serverId: node.serverId,
@@ -322,8 +334,9 @@ const App = () => {
 
                         }
                     })
-                    
-                    setSubDatabase([...subDatabase, ...subDatabase])
+
+                    setSubDatabase([...subDatabase, ...newSubDatabase])
+                }
                     break;
             }
             case "tables":{
@@ -528,7 +541,7 @@ const App = () => {
     }
     if (!isClient) return null;
 
-
+    console.log(contents)
     return (
             <>
                 {renderManu()}

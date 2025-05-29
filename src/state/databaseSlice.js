@@ -12,6 +12,7 @@ const databaseSlice = createSlice({
             return action.payload;
         },
         updateDatabase: (state, action) => {
+            console.log(state, action.payload);
             return state.map(database => {
                 if(database.id === action.payload.id) {
                     return action.payload;
@@ -20,7 +21,7 @@ const databaseSlice = createSlice({
             });
         },
         deleteDatabase: (state, action) => {
-            state = state.filter(database => database.id === action.payload);
+            return state.filter(database => database.id === action.payload);
         }
     },
 });
