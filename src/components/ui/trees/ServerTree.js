@@ -15,7 +15,7 @@ import {setTrigger} from "@/state/triggerSlice";
 import {setColumn} from "@/state/columnSlice";
 import {addContents, setActivePanel, setSelectedObject} from "@/state/generalSlice";
 import {setSubServer} from "@/state/subServerSlice";
-import {getBrokerLog, getBrokers, getDatabases} from "@/utils/api";
+import {getBrokerLog, getBrokers, getDatabases, getDBUser, getTables} from "@/utils/api";
 import ServerMenu from "@/components/ui/menus/ServerMenu";
 import BrokersMenu from "@/components/ui/menus/BrokersMenu";
 import BrokerMenu from "@/components/ui/menus/BrokerMenu";
@@ -195,7 +195,8 @@ const App = () => {
                         type: "database",
                         isLogin: false,
                         status: item.status,
-                        icon: <i className={`fa-light fa-database ${item.status === "inactive" ? "warning" : "success"}`}/>
+                        icon: <i className={`fa-light fa-database ${item.status === "inactive" ? "warning" : "success"}`}/>,
+                        ...item
                     }
                 })
                 dispatch(setDatabase([...databases, ...newDatabases]));
@@ -324,6 +325,7 @@ const App = () => {
                             serverId: node.serverId,
                             id: id,
                             parentId: node.key,
+                            databaseId: node.key,
                             title: item[0],
                             key: `${node.key}-${id}`,
                             type: item[0].toLowerCase(),
@@ -343,8 +345,7 @@ const App = () => {
                 const server = servers.find(item => item.serverId === node.serverId)
                 const database = databases.find(item => item.key === node.parentId)
                 let allClass = []
-                const {result} = await axios.post("/api/list-tables", {...getAPIParam(server), database: database.title, virtual: "normal" })
-                    .then(res => res.data);
+                const {result} = await getTables( {...getAPIParam(server), database: database.title, virtual: "normal" })
                 const systemId = nanoid(8)
                 allClass.push({
                     serverId: node.serverId,
@@ -427,21 +428,24 @@ const App = () => {
             case "users":{
                 const server = servers.find(item => item.serverId === node.serverId)
                 const database = databases.find(item => item.key === node.parentId)
-                const {result} = await axios.post("/api/list-users", {...getAPIParam(server), database: database.title})
-                    .then(res => res.data);
-                const newUser = result.map(item=>{
-                    return {
-                        serverId: node.serverId,
-                        parentId: node.key,
-                        title: item["@name"],
-                        key: `${node.key}-${nanoid(8)}`,
-                        type: "user",
-                        icon: <i className="fa-light fa-user success"/>,
-                        isLeaf: true,
-                        ...item
-                    }
-                })
-                dispatch(setUser([...users, ...newUser]))
+                const response = await getDBUser({...getAPIParam(server), database: database.title})
+                if(response.status){
+                    const newUser = response.result.map(item=>{
+                        return {
+                            serverId: node.serverId,
+                            parentId: node.key,
+                            databaseId: node.parentId,
+                            title: item["@name"],
+                            key: `${node.key}-${nanoid(8)}`,
+                            type: "user",
+                            icon: <i className="fa-light fa-user success"/>,
+                            isLeaf: true,
+                            ...item
+                        }
+                    })
+                    dispatch(setUser([...users, ...newUser]))
+                }
+
                 break
             }
             case "triggers":{
@@ -540,8 +544,6 @@ const App = () => {
 
     }
     if (!isClient) return null;
-
-    console.log(contents)
     return (
             <>
                 {renderManu()}

@@ -18,14 +18,13 @@ export default async function handler(req, res) {
             })
             const {systemclass, userclass} = response.data;
             let result = {system_class: [], user_class: []}
-            console.log(response)
             if(isNotEmpty(systemclass)){
                 result.system_class = systemclass[0].class.filter(res=>res.virtual === virtual);
             }
             if(isNotEmpty(userclass)){
                 result.user_class = userclass[0].class.filter(res=>res.virtual === virtual);
             }
-            res.status(201).json({ success: true, result: result});
+            res.status(200).json({ status: true, result: result});
         }else{
             res.setHeader('Allow', ['GET', 'POST', 'PUT', 'DELETE']);
             res.status(405).end(`Method ${method} not allowed`);

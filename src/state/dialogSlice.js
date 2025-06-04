@@ -9,6 +9,8 @@ const initialState = {
     compactDB: {open: false},
     checkDB: {open: false},
     backupDB: {open: false},
+    optimizeDB: {open: false},
+    copyDB: {open: false},
     loading: false,
 
 };
@@ -38,11 +40,18 @@ const dialogSlice = createSlice({
         setBackupDB: (state, action) => {
             state.backupDB = action.payload;
         },
+        setOptimizeDB: (state, action) => {
+            state.optimizeDB = action.payload;
+        },
+        setCopyDB: (state, action) => {
+            state.copyDB = action.payload;
+        },
         setLoading: (state, action) => {
             state.loading = action.payload;
         }
     },
 });
 
-export const { setConnection, setCompactDB, setCheckDB, setBackupDB, setUserManagement, setUserDB, setLoginDB,  setLoading } = dialogSlice.actions;
+export const { setConnection, setCompactDB, setCheckDB, setBackupDB,
+    setOptimizeDB, setCopyDB,  setUserManagement, setUserDB, setLoginDB,  setLoading } = dialogSlice.actions;
 export default dialogSlice.reducer;

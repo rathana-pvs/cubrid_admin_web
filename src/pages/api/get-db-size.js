@@ -10,11 +10,14 @@ export default async function handler(req, res) {
 
             const response = await axiosInstance.post(`https://${host}:${port}/cm_api`, {
                 dbname: database,
-                task:"userinfo",
+                task:"getdbsize",
                 token
-            })
-            const result = response.data.user;
-            res.status(201).json({ success: true, result: result});
+            }).then((res) => res.data);
+            if(response.status === "success"){
+                res.status(200).json({result: response, status:true})
+            }else{
+                res.status(200).json({...response, status:false})
+            }
         }else{
             res.setHeader('Allow', ['GET', 'POST', 'PUT', 'DELETE']);
             res.status(405).end(`Method ${method} not allowed`);

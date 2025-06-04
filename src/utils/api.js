@@ -28,6 +28,11 @@ export const getBrokers = async (data) => {
     return getResponse(response);
 }
 
+export const getTables = async (data) => {
+    const response = await request.post("/api/get-tables", data).then(res => res.data);
+    return getResponse(response);
+}
+
 
 export const startDatabase = async (data) => {
     const response = await request.post("/api/start-db", data).then(res => res.data);
@@ -85,6 +90,13 @@ export const deleteCMUser = async (data) => {
     return getResponse(response);
 }
 
+export const getDBUser = async (data) => {
+    const response = await request.post("/api/get-db-users", data).then(res => res.data);
+    return getResponse(response);
+}
+
+
+
 export const createUserDB = async (data) => {
     const response = await request.post("/api/create-db-user", data).then(res => res.data);
     return getResponse(response);
@@ -121,3 +133,22 @@ export const getBackupDB = async (data) => {
     return getResponse(response);
 }
 
+export const getOptimizeDB = async (data) => {
+    const response = await request.post("/api/optimize-db", data).then(res => res.data);
+    return getResponse(response);
+}
+
+export const getCopyDB = async (data) => {
+    const response = await request.post("/api/get-copy-db", data).then(res => res.data);
+    return getResponse(response);
+}
+
+export const getDBSpace = async (data) => {
+    const response = await request.post("/api/get-db-space", data).then(res => res.data);
+    return getResponse(response);
+}
+
+export const getDBSize = async (data) => {
+    const response = await request.post("/api/get-db-size", data).then(res => res.data);
+    return getResponse(response);
+}

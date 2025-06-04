@@ -10,7 +10,7 @@ import {deleteUserDB} from "@/utils/api";
 import {getAPIParam} from "@/utils/utils";
 
 export default function({node, event, open, onClose}) {
-    const servers = useSelector(state => state.servers);
+    const {servers, databases} = useSelector(state => state);
     const loginDB = useSelector(state => state.dialog.loginDB)
     const dispatch = useDispatch();
     const {clientX, clientY} = event;
@@ -44,9 +44,10 @@ export default function({node, event, open, onClose}) {
             async onOk() {
 
                 const server = servers.find(res => res.serverId === node.serverId)
+                const database = databases.find(res => res.key === node.databaseId)
                 const response = await deleteUserDB({
                     ...getAPIParam(server),
-                    dbname: loginDB.node.title,
+                    dbname: database.title,
                     username: node.title
                 })
                 if(response.status){

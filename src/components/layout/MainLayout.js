@@ -14,6 +14,8 @@ import LoginDatabase from "@/components/ui/dialogs/LoginDatabase";
 import CompactDB from "@/components/ui/dialogs/CompactDB";
 import CheckDB from "@/components/ui/dialogs/CheckDB";
 import BackupDB from "@/components/ui/dialogs/BackupDB";
+import OptimizeDB from "@/components/ui/dialogs/OptimizeDB";
+import CopyDB from "@/components/ui/dialogs/CopyDB";
 
 
 export default function (props) {
@@ -47,6 +49,8 @@ export default function (props) {
                 <CompactDB/>
                 <CheckDB/>
                 <BackupDB/>
+                <OptimizeDB/>
+                <CopyDB/>
                 {/*<DBLogin/>*/}
                 {/*<LoadingScreen/>*/}
                 {/*<CreateDatabase/>*/}

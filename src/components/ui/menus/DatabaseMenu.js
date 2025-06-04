@@ -4,7 +4,7 @@ import {
 } from "@ant-design/icons";
 import {nanoid} from "nanoid";
 import {useDispatch} from "react-redux";
-import {setBackupDB, setCheckDB, setCompactDB} from "@/state/dialogSlice";
+import {setBackupDB, setCheckDB, setCompactDB, setCopyDB, setOptimizeDB} from "@/state/dialogSlice";
 
 export default function({node, event, open, onClose}) {
 
@@ -159,7 +159,10 @@ export default function({node, event, open, onClose}) {
                 {
                     label: "Database Optimize",
                     key: nanoid(4),
-                    disabled: true
+                    disabled: node.status === "active",
+                    onClick: () => {
+                        dispatch(setOptimizeDB({open: true, node}));
+                    }
                 },
                 {
                     label: "Compact Database",
@@ -175,6 +178,15 @@ export default function({node, event, open, onClose}) {
                         dispatch(setCheckDB({open: true, node}));
                     }
                 },
+                {
+                    label: "Copy Database",
+                    key: nanoid(4),
+                    disabled: node.status === "active",
+                    onClick: () => {
+                        dispatch(setCopyDB({open: true, node}));
+                    }
+                },
+
                 {
                     label: "Create Database",
                     key: nanoid(4),

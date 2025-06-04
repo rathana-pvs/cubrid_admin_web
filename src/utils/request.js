@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const request = axios.create({
-    timeout: 5000, // Optional timeout (10s)
+    timeout: 0, // Optional timeout (10s)
 });
 
 request.interceptors.response.use(

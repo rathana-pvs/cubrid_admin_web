@@ -226,3 +226,11 @@ body {
 .no-wrap {
     white-space: nowrap;
 }
+.border__text{
+    position: absolute;
+    top: -12px;
+    padding: 0 8px;
+    font-weight: 500;
+    background-color: white;
+    transform: translateX(-8%);
+}
