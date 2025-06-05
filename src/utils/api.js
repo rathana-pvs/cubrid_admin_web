@@ -143,6 +143,11 @@ export const getCopyDB = async (data) => {
     return getResponse(response);
 }
 
+export const getDeleteDB = async (data) => {
+    const response = await request.post("/api/get-delete-db", data).then(res => res.data);
+    return getResponse(response);
+}
+
 export const getDBSpace = async (data) => {
     const response = await request.post("/api/get-db-space", data).then(res => res.data);
     return getResponse(response);

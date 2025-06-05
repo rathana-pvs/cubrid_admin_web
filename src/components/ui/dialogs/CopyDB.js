@@ -154,7 +154,7 @@ export default function (){
             }}
         >
             <div style={{ maxHeight: '600px', overflowY: 'auto' }}>
-                <Form form={form} layout="horizontal" name="create_user_form">
+                <Form form={form} layout="horizontal">
                     <div className={styles.db__layout}>
                         <div className={"border__text"}>
                             Source Database

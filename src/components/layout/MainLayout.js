@@ -16,6 +16,7 @@ import CheckDB from "@/components/ui/dialogs/CheckDB";
 import BackupDB from "@/components/ui/dialogs/BackupDB";
 import OptimizeDB from "@/components/ui/dialogs/OptimizeDB";
 import CopyDB from "@/components/ui/dialogs/CopyDB";
+import DeleteDB from "@/components/ui/dialogs/DeleteDB";
 
 
 export default function (props) {
@@ -51,6 +52,7 @@ export default function (props) {
                 <BackupDB/>
                 <OptimizeDB/>
                 <CopyDB/>
+                <DeleteDB/>
                 {/*<DBLogin/>*/}
                 {/*<LoadingScreen/>*/}
                 {/*<CreateDatabase/>*/}

@@ -4,7 +4,7 @@ import {
 } from "@ant-design/icons";
 import {nanoid} from "nanoid";
 import {useDispatch} from "react-redux";
-import {setBackupDB, setCheckDB, setCompactDB, setCopyDB, setOptimizeDB} from "@/state/dialogSlice";
+import {setBackupDB, setCheckDB, setCompactDB, setCopyDB, setDeleteDB, setOptimizeDB} from "@/state/dialogSlice";
 
 export default function({node, event, open, onClose}) {
 
@@ -212,7 +212,10 @@ export default function({node, event, open, onClose}) {
                 {
                     label: "Delete Database",
                     key: nanoid(4),
-                    disabled: true
+                    disabled: node.status === "active",
+                    onClick: ()=>{
+                        dispatch(setDeleteDB({open: true, node}));
+                    }
                 },
             ]
         },

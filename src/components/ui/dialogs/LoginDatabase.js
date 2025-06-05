@@ -51,12 +51,6 @@ export default function () {
                     })))
                     handleClose()
                 }
-            }else{
-                Modal.error({
-                    title: 'Error',
-                    content: response.note,
-                    okText: "Close"
-                })
             }
         })
 
