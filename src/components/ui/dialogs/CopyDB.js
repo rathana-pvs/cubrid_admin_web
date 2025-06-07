@@ -225,8 +225,6 @@ export default function (){
                             <div>Database Size: {bytesToMB(dbSize)}(MB)</div>
                         </Col>
                     </Row>
-
-
                     <Row>
                         <Col span={24}>
                             <Checkbox name="overwrite" checked={checkBoxFields.overwrite}

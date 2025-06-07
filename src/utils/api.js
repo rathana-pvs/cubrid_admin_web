@@ -148,6 +148,10 @@ export const getDeleteDB = async (data) => {
     return getResponse(response);
 }
 
+export const getRenameDB = async (data) => {
+    const response = await request.post("/api/get-rename-size", data).then(res => res.data);
+    return getResponse(response);
+}
 export const getDBSpace = async (data) => {
     const response = await request.post("/api/get-db-space", data).then(res => res.data);
     return getResponse(response);
