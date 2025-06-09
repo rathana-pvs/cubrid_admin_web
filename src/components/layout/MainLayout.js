@@ -18,6 +18,8 @@ import OptimizeDB from "@/components/ui/dialogs/OptimizeDB";
 import CopyDB from "@/components/ui/dialogs/CopyDB";
 import DeleteDB from "@/components/ui/dialogs/DeleteDB";
 import RenameDB from "@/components/ui/dialogs/RenameDB";
+import RestoreDB from "@/components/ui/dialogs/RestoreDB";
+import PlanDump from "@/components/ui/dialogs/PlanDump";
 
 
 export default function (props) {
@@ -55,6 +57,8 @@ export default function (props) {
                 <CopyDB/>
                 <DeleteDB/>
                 <RenameDB/>
+                <RestoreDB/>
+                <PlanDump/>
                 {/*<DBLogin/>*/}
                 {/*<LoadingScreen/>*/}
                 {/*<CreateDatabase/>*/}

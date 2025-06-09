@@ -10,8 +10,8 @@ import {
     setCompactDB,
     setCopyDB,
     setDeleteDB,
-    setOptimizeDB,
-    setRenameDB
+    setOptimizeDB, setPlanDump,
+    setRenameDB, setRestoreDB
 } from "@/state/dialogSlice";
 
 export default function({node, event, open, onClose}) {
@@ -216,9 +216,12 @@ export default function({node, event, open, onClose}) {
                     }
                 },
                 {
-                    label: "Restore Unload",
+                    label: "Restore DB",
                     key: nanoid(4),
-                    disabled: true
+                    disabled: node.status === "active",
+                    onClick: ()=>{
+                        dispatch(setRestoreDB({open: true, node}));
+                    }
                 },
                 {
                     label: "Delete Database",
@@ -249,6 +252,10 @@ export default function({node, event, open, onClose}) {
                     label: "Plan Dump",
                     key: nanoid(4),
                     icon: <ReloadOutlined />,
+                    disabled: node.status === "inactive",
+                    onClick: ()=>{
+                        dispatch(setPlanDump({open: true, node}));
+                    }
                 },
                 {
                     label: "Param Dump",

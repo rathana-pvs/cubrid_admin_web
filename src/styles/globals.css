@@ -234,3 +234,13 @@ body {
     background-color: white;
     transform: translateX(-8%);
 }
+.col__center{
+    display: flex;
+    align-items: center;
+}
+.spacer_v{
+    height: 8px;
+    width: 100%;
+
+
+}
