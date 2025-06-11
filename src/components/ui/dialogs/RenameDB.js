@@ -16,6 +16,7 @@ export default function (){
     const [server, setServer] = useState({});
     const [form] = Form.useForm();
     const handleOk = async () => {
+        console.log(form)
         form.validateFields().then(async (values) => {
             dispatch(setLoading(true));
             const data = {...getAPIParam(server),

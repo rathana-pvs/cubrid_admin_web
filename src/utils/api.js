@@ -167,3 +167,13 @@ export const getDBSize = async (data) => {
     const response = await request.post("/api/get-db-size", data).then(res => res.data);
     return getResponse(response);
 }
+
+export const getChangeCMPassword = async (data) => {
+    const response = await request.post("/api/change-cm-password", data).then(res => res.data);
+    return getResponse(response);
+}
+
+export const getCubridConfig = async (data) => {
+    const response = await request.post("/api/get-system-param", {...data, confname: "cubridconfig"}).then(res => res.data);
+    return getResponse(response);
+}

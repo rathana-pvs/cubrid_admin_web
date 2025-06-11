@@ -10,7 +10,7 @@ import {
     onStopBrokers, onStopDatabase,
     onStopService
 } from "@/utils/utils";
-import {setUserManagement} from "@/state/dialogSlice";
+import {setChangeCMPassword, setUserManagement} from "@/state/dialogSlice";
 
 
 
@@ -76,7 +76,11 @@ export default function (){
             }
         },
         {
-            label: <span>Change Password Of <b>admin</b></span>
+            label: <span>Change Password Of <b>admin</b></span>,
+            onClick: ()=>{
+                dispatch(setChangeCMPassword({open: true, node: selectedObject}));
+            },
+            disabled: !connected,
         },
         {
             label: 'User Management',
