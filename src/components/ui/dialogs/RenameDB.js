@@ -20,10 +20,14 @@ export default function (){
         form.validateFields().then(async (values) => {
             dispatch(setLoading(true));
             const data = {...getAPIParam(server),
-                dbname: renameDB.node.title, ...values, forcedel: values.forcedel ? "y" : "n"}
+                ...values,
+                rename: values.dbname,
+                dbname: renameDB.node.title,
+                advanced: "off", forcedel: values.forcedel ? "y" : "n"}
             const response = await getRenameDB(data);
             if(response.status){
                 const resDatabase = await getDatabases({...getAPIParam(server)})
+                dispatch(setLoading(false));
                 if(resDatabase.status){
                     const newDatabases = resDatabase.result.map(item=>{
                         return {
@@ -48,6 +52,8 @@ export default function (){
                 }
 
                 handleClose()
+            }else{
+                dispatch(setLoading(false));
             }
         })
     };

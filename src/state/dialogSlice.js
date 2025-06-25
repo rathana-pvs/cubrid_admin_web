@@ -15,8 +15,11 @@ const initialState = {
     renameDB: {open: false},
     restoreDB: {open: false},
     planDump: {open: false},
+    paramDump: {open: false},
     changeCMPassword: {open: false},
+    property: {open: false},
     loading: false,
+
 
 };
 
@@ -63,8 +66,14 @@ const dialogSlice = createSlice({
         setPlanDump: (state, action) => {
             state.planDump = action.payload;
         },
+        setParamDump: (state, action) => {
+            state.paramDump = action.payload;
+        },
         setChangeCMPassword: (state, action) => {
             state.changeCMPassword = action.payload;
+        },
+        setProperty: (state, action) => {
+            state.property = action.payload;
         },
         setLoading: (state, action) => {
             state.loading = action.payload;
@@ -74,5 +83,5 @@ const dialogSlice = createSlice({
 
 export const { setConnection, setCompactDB, setCheckDB, setBackupDB,
     setOptimizeDB, setCopyDB, setDeleteDB, setRenameDB,
-    setUserManagement, setChangeCMPassword, setPlanDump, setRestoreDB, setUserDB, setLoginDB,  setLoading } = dialogSlice.actions;
+    setUserManagement, setProperty, setParamDump, setChangeCMPassword, setPlanDump, setRestoreDB, setUserDB, setLoginDB,  setLoading } = dialogSlice.actions;
 export default dialogSlice.reducer;

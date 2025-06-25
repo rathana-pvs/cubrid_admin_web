@@ -7,6 +7,7 @@
     --text-color: rgb(51, 51, 51);        /* Dark Gray - Readable Main Text */
     --text-color-light: rgb(170, 170, 170); /* Light Gray - Muted Text */
     --background-layout-color: rgb(236, 240, 241);
+    --backround-selected: rgb(230, 230, 230);
     --folder-color: rgb(255, 211, 77);
     --border: #e5e5e5;
     --text-400:400;

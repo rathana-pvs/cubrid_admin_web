@@ -10,7 +10,7 @@ import {
     setCompactDB,
     setCopyDB,
     setDeleteDB,
-    setOptimizeDB, setPlanDump,
+    setOptimizeDB, setParamDump, setPlanDump,
     setRenameDB, setRestoreDB
 } from "@/state/dialogSlice";
 
@@ -33,25 +33,21 @@ export default function({node, event, open, onClose}) {
                     label: "Exports (loadDB)",
                     key: nanoid(4),
                     icon: <ReloadOutlined />,
-
                 },
                 {
                     label: "Exports Index Only(loadDB)",
                     key: nanoid(4),
                     icon: <ReloadOutlined />,
-
                 },
                 {
                     label: "Exports Index Only(sql,csv,xls,txt,obs)",
                     key: nanoid(4),
                     icon: <ReloadOutlined />,
-
                 },
                 {
                     label: "Export DB with Comments (sql,csv,xls,txt,obs)",
                     key: nanoid(4),
                     icon: <ReloadOutlined />,
-
                 },
                 {
                     label: "Export DB with Comments (loadDB)",
@@ -241,17 +237,16 @@ export default function({node, event, open, onClose}) {
                 {
                     label: "Lock Information",
                     key: nanoid(4),
-                    icon: <ReloadOutlined />,
+                    disabled: true,
                 },
                 {
                     label: "Transaction Info",
                     key: nanoid(4),
-                    icon: <ReloadOutlined />,
+                    disabled: true,
                 },
                 {
                     label: "Plan Dump",
                     key: nanoid(4),
-                    icon: <ReloadOutlined />,
                     disabled: node.status === "inactive",
                     onClick: ()=>{
                         dispatch(setPlanDump({open: true, node}));
@@ -260,12 +255,15 @@ export default function({node, event, open, onClose}) {
                 {
                     label: "Param Dump",
                     key: nanoid(4),
-                    icon: <ReloadOutlined />,
+                    disabled: node.status === "inactive",
+                    onClick: ()=>{
+                        dispatch(setParamDump({open: true, node}));
+                    }
                 },
                 {
                     label: "OID Navigator",
                     key: nanoid(4),
-                    icon: <ReloadOutlined />,
+                    disabled: true
                 },
             ]
         },

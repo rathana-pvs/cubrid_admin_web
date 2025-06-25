@@ -102,11 +102,26 @@ body {
     background-color: var(--primary-color);
     color: white;
 }
+
 .button__primary:hover{
-    background-color: var(--primary-color) !important;
-    color: white !important;
+    /*background-color: var(--primary-color);*/
+    /*color: white !important;*/
     opacity: 0.9;
 }
+
+.button__error{
+    background-color: var(--danger-color);
+    color: white;
+}
+.button__error:hover{
+    /*background-color: var(--danger-color);*/
+    border: 1px solid var(--danger-color);
+    opacity: 0.9;
+}
+.button__width__80{
+    width: 80px;
+}
+
 
 
 /*.button__small{*/
@@ -243,4 +258,13 @@ body {
     width: 100%;
 
 
+}
+.row__selected{
+    background-color: var(--backround-selected) !important;
+}
+.row__selected .ant-table-cell-row-hover{
+    background-color: var(--backround-selected) !important;
+}
+.clickable__table .ant-table-tbody > tr:hover {
+    cursor: pointer;
 }

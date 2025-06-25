@@ -99,3 +99,10 @@ th.ant-table-cell{
 .ant-tabs-left{
     width: 100% !important;
 }
+
+.custom-table .ant-table-cell {
+    padding: 4px !important;
+}
+.striped {
+    background-color: #fafafa;
+}

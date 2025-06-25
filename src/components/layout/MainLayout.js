@@ -21,6 +21,8 @@ import RenameDB from "@/components/ui/dialogs/RenameDB";
 import RestoreDB from "@/components/ui/dialogs/RestoreDB";
 import PlanDump from "@/components/ui/dialogs/PlanDump";
 import ChangeCMPassword from "@/components/ui/dialogs/ChangeCMPassword";
+import ParamDump from "@/components/ui/dialogs/ParamDump";
+import Property from "@/components/ui/dialogs/property/Property";
 
 
 export default function (props) {
@@ -60,7 +62,9 @@ export default function (props) {
                 <RenameDB/>
                 <RestoreDB/>
                 <PlanDump/>
+                <ParamDump/>
                 <ChangeCMPassword/>
+                <Property/>
                 {/*<DBLogin/>*/}
                 {/*<LoadingScreen/>*/}
                 {/*<CreateDatabase/>*/}

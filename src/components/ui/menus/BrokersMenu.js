@@ -10,6 +10,8 @@ import {
 import {nanoid} from "nanoid";
 import {useDispatch, useSelector} from "react-redux";
 import {onStartBrokers, onStopBrokers} from "@/utils/utils";
+import {addContents} from "@/state/generalSlice";
+import {CONFIG_PARAM_CONTENT} from "@/utils/data";
 
 export default function({node, event, open, onClose}) {
     const state = useSelector(state => state);
@@ -40,6 +42,9 @@ export default function({node, event, open, onClose}) {
             label: "Edit Broker",
             key: nanoid(4),
             icon: <ReloadOutlined />,
+            onClick: ()=>{
+                dispatch(addContents({ ...node, ...CONFIG_PARAM_CONTENT[1], children: CONFIG_PARAM_CONTENT[1].screen}))
+            }
 
         },
         {

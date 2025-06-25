@@ -149,12 +149,17 @@ export const getDeleteDB = async (data) => {
 }
 
 export const getRenameDB = async (data) => {
-    const response = await request.post("/api/get-rename-size", data).then(res => res.data);
+    const response = await request.post("/api/get-rename-db", data).then(res => res.data);
     return getResponse(response);
 }
 
 export const getPlanDump = async (data) => {
     const response = await request.post("/api/get-plan-dump", data).then(res => res.data);
+    return getResponse(response);
+}
+
+export const getParamDump = async (data) => {
+    const response = await request.post("/api/get-param-dump", data).then(res => res.data);
     return getResponse(response);
 }
 
@@ -174,6 +179,29 @@ export const getChangeCMPassword = async (data) => {
 }
 
 export const getCubridConfig = async (data) => {
-    const response = await request.post("/api/get-system-param", {...data, confname: "cubridconfig"}).then(res => res.data);
+    const response = await request.post("/api/get-system-param", {...data, confname: "cubrid.conf"}).then(res => res.data);
+    return getResponse(response);
+}
+export const setCubridConfig = async (data) => {
+    const response = await request.post("/api/set-system-param", {...data, confname: "cubrid.conf"}).then(res => res.data);
+    return getResponse(response);
+}
+export const getCubridBrokerConfig = async (data) => {
+    const response = await request.post("/api/get-system-param", {...data, confname: "cubrid_broker.conf"}).then(res => res.data);
+    return getResponse(response);
+}
+
+export const setCubridBrokerConfig = async (data) => {
+    const response = await request.post("/api/set-system-param", {...data, confname: "cubrid_broker.conf"}).then(res => res.data);
+    return getResponse(response);
+}
+
+export const getCMConfig = async (data) => {
+    const response = await request.post("/api/get-system-param", {...data, confname: "cm.conf"}).then(res => res.data);
+    return getResponse(response);
+}
+
+export const setCMConfig = async (data) => {
+    const response = await request.post("/api/set-system-param", {...data, confname: "cm.conf"}).then(res => res.data);
     return getResponse(response);
 }

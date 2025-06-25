@@ -43,3 +43,15 @@
     background-color: var(--background-layout-color);
     min-height: 120px;
 }
+.property__layout{
+    display: grid;
+    grid-template-columns: 260px auto;
+    max-height: 600px;
+
+}
+.property__layout__menu{
+    border-right: 1px solid var(--border);
+}
+.property__layout__content{
+    padding-left: 12px;
+}

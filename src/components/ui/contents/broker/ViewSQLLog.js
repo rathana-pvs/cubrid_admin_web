@@ -5,31 +5,6 @@ import {viewLog} from "@/utils/api";
 import {getAPIParam} from "@/utils/utils";
 import {setLoading} from "@/state/dialogSlice";
 
-const logs = [
-    "25-05-23 06:53:22.873 (0) connect db db_test user dba url jdbc:cubrid:localhost:30000:db_test:dba:********:, error:-171, Incorrect or missing password.",
-    "25-05-23 06:54:29.364 (0) connect db db_test user dba url jdbc:cubrid:localhost:30000:db_test:dba:********:, error:-171, Incorrect or missing password.",
-    // ... more logs
-];
-
-// Convert logs into table data with index
-const dataSource = logs.map((log, index) => ({
-    key: index,
-    no: index + 1,
-    message: log,
-}));
-
-const columns = [
-    {
-        title: 'No',
-        dataIndex: 'no',
-        key: 'no',
-    },
-    {
-        title: 'Message',
-        dataIndex: 'message',
-        key: 'message',
-    },
-];
 
 
 

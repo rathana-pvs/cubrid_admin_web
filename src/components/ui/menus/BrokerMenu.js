@@ -1,5 +1,6 @@
 import {Dropdown} from "antd";
 import {
+    EditOutlined,
     PlusOutlined, ReloadOutlined,
 } from "@ant-design/icons";
 import {nanoid} from "nanoid";

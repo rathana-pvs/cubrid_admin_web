@@ -9,7 +9,7 @@ export default async function handler(req, res) {
             const { host, port, token, ...value} = req.body;
             const response = await axiosInstance.post(`https://${host}:${port}/cm_api`, {
                 ...value,
-                task:"getallsysparam",
+                task:"setsysparam",
                 token
             }).then((res) => res.data);
             if(response.status === "success"){
