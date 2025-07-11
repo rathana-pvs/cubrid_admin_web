@@ -63,6 +63,11 @@ export const stopBroker = async (data) => {
     return getResponse(response);
 }
 
+export const restartBroker = async (data) => {
+    await stopBrokers(data)
+    await startBrokers(data)
+}
+
 export const getBrokerLog = async (data) => {
     const response = await request.post("/api/get-broker-log", data).then(res => res.data);
     return getResponse(response);
@@ -203,5 +208,15 @@ export const getCMConfig = async (data) => {
 
 export const setCMConfig = async (data) => {
     const response = await request.post("/api/set-system-param", {...data, confname: "cm.conf"}).then(res => res.data);
+    return getResponse(response);
+}
+
+export const getAdminLog = async (data) => {
+    const response = await request.post("/api/get-admin-log", data).then(res => res.data);
+    return getResponse(response);
+}
+
+export const getAccessLog = async (data) => {
+    const response = await request.post("/api/get-access-log", data).then(res => res.data);
     return getResponse(response);
 }

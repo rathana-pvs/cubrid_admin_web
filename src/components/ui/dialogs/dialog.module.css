@@ -47,6 +47,7 @@
     display: grid;
     grid-template-columns: 260px auto;
     max-height: 600px;
+    gap: 12px;
 
 }
 .property__layout__menu{

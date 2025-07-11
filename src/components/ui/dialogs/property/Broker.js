@@ -3,11 +3,12 @@ import {Button, Col, Divider, Form, Input, Popconfirm, Row, Space, Table} from "
 import React, {useEffect, useState} from "react";
 import ManageBroker from "@/components/ui/dialogs/property/ManageBroker";
 import {nanoid} from "nanoid";
-import {getCubridBrokerConfig, setCubridBrokerConfig} from "@/utils/api";
+import {getCubridBrokerConfig, restartBroker, setCubridBrokerConfig} from "@/utils/api";
 import {useDispatch, useSelector} from "react-redux";
-import {extractBroker, extractParam, getAPIParam, getAssembleBroker} from "@/utils/utils";
-import {setLoading} from "@/state/dialogSlice";
+import {extractBroker, extractParam, getAPIParam, getAssembleBroker, onRestartBrokers} from "@/utils/utils";
+import {setLoading, setProperty} from "@/state/dialogSlice";
 import {confirmAction} from "@/utils/ui-action";
+import {serverDisconnect} from "@/state/sharedAction";
 
 export default function (){
     const [form] = Form.useForm();
@@ -17,12 +18,12 @@ export default function (){
     const {property} = useSelector(state => state.dialog);
     const {servers} = useSelector(state => state);
     const [server, setServer] = useState({});
-    const [brokerData, setBrokerData] = useState([]);
     const [originBroker, setOriginBroker] = useState(null);
     const [saveData, setSaveData] = useState([]);
     const [editData, setEditData] = useState([]);
     const [title, setTitle] = useState(null);
-    const [data, setData] = useState([]);
+    const [brokers, setBrokers] = useState([]);
+    const [draft, setDraft] = useState([]);
 
     const columns = [
         {
@@ -38,74 +39,93 @@ export default function (){
 
     const handleSave = async () => {
 
-        const extractData = extractBroker(originBroker)
+        const extractData = {...draft}
         extractData["broker"] = form.getFieldsValue()
-        if(title){
-            extractData[`%${title}`] = Object.fromEntries(
-                saveData.map(res => [res.parameter, res.value])
-            );
-        }
 
-
-        const finalData = getAssembleBroker(extractData)
-        await submitRequest(finalData);
+        setDraft(extractData);
+        await submitRequest(extractData)
+        dispatch(setLoading(true))
+        await restartBroker({...getAPIParam(server)})
+        dispatch(serverDisconnect())
+        dispatch(setLoading(false))
 
     };
 
-    const submitRequest = async (finalData) => {
+    const onEditDraft = (title, data, editData) => {
+        let updateDraft = {};
+        if(editData){
+            for(let key in draft){
+                if(key === `%${editData.name}`){
+                    updateDraft[`%${title}`] = {...Object.fromEntries(data.map(res => [res.parameter, res.value])), notPersisted: true}
+                }else{
+                    updateDraft[key] = {...draft[key]}
+                }
+            }
+        } else {
+            updateDraft = {...draft}
+            updateDraft[`%${title}`] = {...Object.fromEntries(data.map(res => [res.parameter, res.value])), notPersisted: true};
+
+        }
+        setSelectedKey(null)
+        setDraft(updateDraft);
+        getRefreshData(updateDraft)
+    }
+
+    const submitRequest = async (draftData) => {
+        const finalData = getAssembleBroker(draftData)
         dispatch(setLoading(true))
         const response = await setCubridBrokerConfig({...getAPIParam(server), confdata: finalData})
         if (response.status) {
-            await getRefreshData(server)
+            await getRefreshApi(server)
             dispatch(setLoading(false))
         }
     }
 
     const handleDelete = async () => {
-        const object = data.find(res => res.key === selectedKey);
-        confirmAction({
-            content: `Are you sure to delete broker: ${object.name}`,
-            onOk: async () => {
-                const extractData = extractBroker(originBroker)
-                delete extractData[`%${object.name}`]
-                const finalData = getAssembleBroker(extractData)
-                await submitRequest(finalData);
-            },
+        const object = brokers.find(res => res.key === selectedKey);
 
-
-        })
-
-
+        const data = {...draft}
+        delete data[`%${object.name}`]
+        setDraft(data)
+        getRefreshData(data)
     };
 
-    const getRefreshData = async (server) => {
+
+    const getRefreshApi = async (server) => {
         dispatch(setLoading(true));
-        getCubridBrokerConfig({...getAPIParam(server)}).then(res => {
+        getCubridBrokerConfig({...getAPIParam(server)}).then(async res => {
             if (res.status) {
                 setOriginBroker(res.result.conflist[0].confdata)
-                const data = extractParam(res.result.conflist[0].confdata)
-                setBrokerData(data[0])
-                const broker = data[0].broker
-                form.setFieldsValue({
-                    ...broker
-                })
-                setData(Object.keys(data[0]).filter(res => res !== "broker").map(res => {
-                    return {
-                        key: nanoid(4),
-                        name: res.replace("%", ""),
-                        port: data[0][res]["BROKER_PORT"]
-                    }
-                }))
+                const data = extractBroker(res.result.conflist[0].confdata)
+                setDraft(data)
+                getRefreshData(data)
             }
         })
     }
-
+    const getRefreshData = (data) => {
+                const broker = data.broker
+                form.setFieldsValue({
+                    ...broker
+                })
+                setBrokers(Object.keys(data).filter(res => !["comment", "broker"].includes(res)).map(res => {
+                    return {
+                        key: nanoid(4),
+                        name: res.replace("%", ""),
+                        port: data[res]["BROKER_PORT"],
+                        notPersisted: data[res]["notPersisted"]
+                    }
+                }))
+    }
     useEffect(() => {
-        const server = servers.find(res => res.serverId === property.node.serverId)
-        setServer(server);
-        getRefreshData(server).then(res=>dispatch(setLoading(false)));
+        if(property.open){
+            const server = servers.find(res => res.serverId === property.node.serverId)
+            setServer(server);
+            getRefreshApi(server).then(res=>dispatch(setLoading(false)));
+        }
 
-    }, []);
+
+    }, [property.open]);
+
 
     return <div className={styles.property__layout__content}>
         <Form form={form} layout="horizontal">
@@ -140,13 +160,21 @@ export default function (){
         <Table
             className={"clickable__table"}
             columns={columns}
-            dataSource={data}
+            dataSource={brokers}
             pagination={false}
             size="small"
             bordered
 
-            rowClassName={(record) =>
-                record.key === selectedKey ? "row__selected" : ""
+            rowClassName={(record) => {
+                let classNames = ""
+                if(record.key === selectedKey) {
+                    classNames = classNames + " row__selected"
+                }
+                if(record.notPersisted) {
+                    classNames = classNames + " warning"
+                }
+                return classNames
+            }
             }
             onRow={(record) => ({
                 onClick: () => {
@@ -160,8 +188,7 @@ export default function (){
             <Button disabled={!selectedKey} type={"primary"}
                     className={"button__width__80"}
                     onClick={()=>{
-                        const object = data.find(res => res.key === selectedKey);
-                        console.log(object);
+                        const object = brokers.find(res => res.key === selectedKey);
                         setManage({open: true, type: "edit", editData: object});
                     }}>Edit</Button>
             <Button disabled={!selectedKey}
@@ -176,14 +203,12 @@ export default function (){
                     >Save</Button>
             <Button type={"primary"}
                     className={"button__width__80"}
-                    >Cancel</Button>
+                    onClick={()=>{
+                        dispatch(setProperty({open: false}))
+                    }}
+                    >Close</Button>
         </div>
-        <ManageBroker {...manage} brokerData={brokerData} onSave={
-            (title, data)=>{
-                setTitle(title);
-                setSaveData(data)
-            }
-        }
-                      onClose={()=>setManage({open: false})} />
+        <ManageBroker {...manage} brokerData={draft} onSave={onEditDraft}
+                      onClose={()=>setManage({...manage, open: false})} />
     </div>
 }

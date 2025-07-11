@@ -4,10 +4,14 @@ import styles from "@/components/ui/dialogs/dialog.module.css";
 import {nanoid} from "nanoid";
 import Broker from "@/components/ui/dialogs/property/Broker";
 import {useSelector} from "react-redux";
+import CommonParam from "@/components/ui/dialogs/property/CommonParam";
+import Common from "@/components/ui/dialogs/property/Common/Common";
 const { TabPane } = Tabs;
 
 const screenData = {
     broker: {screen: <Broker />},
+    common: {screen: <Common/>}
+
 }
 
 export default function (){
@@ -33,7 +37,7 @@ export default function (){
             // onOk={onOk}
             // onCancel={onCancel}
             footer={null}
-            width={1000}
+            width={1080}
         >
             <div className={styles.property__layout}>
                 <div className={styles.property__layout__menu}>

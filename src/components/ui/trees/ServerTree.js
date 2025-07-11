@@ -15,7 +15,7 @@ import {setTrigger} from "@/state/triggerSlice";
 import {setColumn} from "@/state/columnSlice";
 import {addContents, setActivePanel, setSelectedObject} from "@/state/generalSlice";
 import {setSubServer} from "@/state/subServerSlice";
-import {getBrokerLog, getBrokers, getDatabases, getDBUser, getTables} from "@/utils/api";
+import {getAdminLog, getBrokerLog, getBrokers, getDatabases, getDBUser, getTables} from "@/utils/api";
 import ServerMenu from "@/components/ui/menus/ServerMenu";
 import BrokersMenu from "@/components/ui/menus/BrokersMenu";
 import BrokerMenu from "@/components/ui/menus/BrokerMenu";
@@ -24,6 +24,11 @@ import {setLoginDB} from "@/state/dialogSlice";
 import UserMenu from "@/components/ui/menus/UserMenu";
 import ViewSQLLog from "@/components/ui/contents/broker/ViewSQLLog";
 import DatabaseMenu from "@/components/ui/menus/DatabaseMenu";
+import * as database from "framer-motion/m";
+import item from "jsonwebtoken/lib/NotBeforeError";
+import {setAdminLog} from "@/state/logSlicce";
+import AccessLog from "@/components/ui/contents/log/manager/AccessLog";
+import ErrorLog from "@/components/ui/contents/log/manager/ErrorLog";
 
 
 function buildTree(...dataSets) {
@@ -32,6 +37,7 @@ function buildTree(...dataSets) {
         map.set(item.key, { ...item, children: item.sub?item.sub:[] });
     });
     const tree = [];
+    console.log(map)
     map.forEach((node) => {
         if (node.parentId) {
             const parent = map.get(node.parentId);
@@ -40,6 +46,7 @@ function buildTree(...dataSets) {
             tree.push(node);
         }
     });
+    console.log(tree);
     return tree;
 }
 
@@ -56,7 +63,9 @@ const contents = [
 ]
 
 const panels = [
-    {type: "broker_log_file", children: <ViewSQLLog/>}
+    {type: "broker_log_file", children: <ViewSQLLog/>},
+    {type: "manager_access_log", children: <AccessLog/>},
+    {type: "manager_error_log", children: <ErrorLog/>},
 ]
 const menus = [
     {type: "server", Screen: ServerMenu},
@@ -75,11 +84,14 @@ const menus = [
 ]
 
 const App = () => {
-    const {servers, subServers, databases, brokers, tables, views, users, triggers, columns, ...state} = useSelector(state=> state);
+    const {servers, subServers, databases, brokers, tables, views,
+        users, triggers, columns, logs, ...state} = useSelector(state=> state);
     const {contents} = useSelector(state=> state.general);
     const dispatch = useDispatch();
     const [subLogger, setSubLogger] = useState([]);
     const [subDatabase, setSubDatabase] = useState([]);
+    const [subBrokerLog, setSubBrokerLog] = useState([]);
+    const [subServerLog, setSubServerLog] = useState([]);
     const [isClient, setIsClient] = useState(false);
     const [menu, setMenu] = useState({});
 
@@ -233,39 +245,14 @@ const App = () => {
                 break
             }
             case "logs":{
+                const id = nanoid(8)
                 const subLog = [
                     {
                         parentId: node.key,
                         title: "Broker",
-                        key: nanoid(8),
-                        type: "broker",
+                        key: id,
+                        type: "log_broker",
                         icon: <i className="fa-light fa-folder-tree"></i>,
-                        sub: [
-                            {
-                                serverId: node.serverId,
-                                parentId: node.key,
-                                title: "Access Log",
-                                key: nanoid(8),
-                                type: "folder_admin_log",
-                                icon: <i className="fa-solid fa-folder icon__folder"></i>
-                            },
-                            {
-                                serverId: node.serverId,
-                                parentId: node.key,
-                                title: "Error Log",
-                                key: nanoid(8),
-                                type: "folder_admin_log",
-                                icon: <i className="fa-solid fa-folder icon__folder"></i>
-                            },
-                            {
-                                serverId: node.serverId,
-                                parentId: node.key,
-                                title: "Admin Log",
-                                key: nanoid(8),
-                                type: "folder_admin_log",
-                                icon: <i className="fa-solid fa-folder icon__folder"></i>
-                            }
-                        ]
                     },
                     {
                         serverId: node.serverId,
@@ -280,7 +267,7 @@ const App = () => {
                                 parentId: node.key,
                                 title: "Access Log",
                                 key: nanoid(8),
-                                type: "access_log",
+                                type: "manager_access_log",
                                 icon: <i className="fa-solid fa-file"></i>,
                                 isLeaf:true
 
@@ -290,7 +277,7 @@ const App = () => {
                                 parentId: node.key,
                                 title: "Error Log",
                                 key: nanoid(8),
-                                type: "error_log",
+                                type: "manager_error_log",
                                 icon: <i className="fa-solid fa-file error"></i>,
                                 isLeaf: true,
                             }
@@ -307,6 +294,36 @@ const App = () => {
                     }
                 ]
                 setSubLogger(subLog)
+
+                const newSubBrokerLog = [
+                    {
+                        serverId: node.serverId,
+                        parentId: id,
+                        title: "Access Log",
+                        key: nanoid(8),
+                        type: "folder_access_log",
+                        icon: <i className="fa-solid fa-folder icon__folder"></i>
+                    },
+                    {
+                        serverId: node.serverId,
+                        parentId: id,
+                        title: "Error Log",
+                        key: nanoid(8),
+                        type: "folder_error_log",
+                        icon: <i className="fa-solid fa-folder icon__folder"></i>
+                    },
+                    {
+                        serverId: node.serverId,
+                        parentId: id,
+                        title: "Admin Log",
+                        key: nanoid(8),
+                        type: "folder_admin_log",
+                        icon: <i className="fa-solid fa-folder icon__folder"></i>,
+                        children: [],
+                    }
+                ]
+
+                setSubBrokerLog(newSubBrokerLog)
                 break;
             }
             case "database":{
@@ -528,12 +545,47 @@ const App = () => {
                 dispatch(setColumn([...columns, ...columnIndex]))
                 break
             }
+            case "folder_admin_log":{
+                const server = servers.find(item => item.serverId === node.serverId)
+                const response = await getAdminLog({...getAPIParam(server)})
+                if(response.status){
+                    const newLogs = response.result.map(res=>{
+                        return {
+                            ...res,
+                            serverId: node.serverId,
+                            parentId: node.key,
+                            key: nanoid(8),
+                            title: `${res.path.split("/").pop()}`,
+                            icon: <i className="fa-solid fa-file"></i>,
+
+                        }
+                    })
+                    dispatch(setAdminLog([...logs.adminLogs, ...newLogs]))
+                }
+            break;
+            }
+            case "log_server":{
+                const response =  await getDatabases({...getAPIParam(server)});
+                if(response.status){
+                    const newSubServerLog = response.result.map(item=>{
+                        return {
+                            serverId: node.serverId,
+                            parentId: node.key,
+                            key: `${node.key}-${nanoid(8)}`,
+                            title: item.dbname,
+                            type: "folder_log_server",
+                            icon: <i className="fa-light fa-folder icon__folder"></i>,
+                            ...item
+                        }
+                    })
+                    // setSubServerLog(newSubServerLog)
+                }
+            }
 
 
         }
 
     }
-
 
     const renderManu = ()=>{
         const {Screen, open, ...e} = menu
@@ -554,7 +606,8 @@ const App = () => {
                     loadData={loadData}
                     onSelect={onSelect}
                     treeData={buildTree(servers, subServers, databases,
-                        brokers, subLogger, subDatabase, tables, views, users, triggers, columns)}
+                        brokers, subLogger, subDatabase,
+                        tables, views, users, triggers, columns, subBrokerLog, [...logs.adminLogs], subServerLog)}
 
                 />
             </>

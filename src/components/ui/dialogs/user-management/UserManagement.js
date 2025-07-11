@@ -21,17 +21,17 @@ const EditableUserTable = () => {
     const [users, setUsers] = useState([]);
     const [form] = Form.useForm();
 
-    const setUserData =(data)=>{
-        setUsers(data.map((user)=>{
-            return {
+    const setUserData = (data) => {
+        setUsers(
+            data.map((user) => ({
                 targetId: user["@id"],
-                dbAuth: user.dbauth,
-                casAuth: user.casauth,
-                statusMonitorAuth: user.statusmonitorauth,
-                key: nanoid(8)
-            }
-        }));
-    }
+                dbAuth: typeof user.dbauth === 'object' ? user.dbauth?.auth_info : user.dbauth,
+                casAuth: typeof user.casauth === 'object' ? user.casauth?.auth_info : user.casauth,
+                statusMonitorAuth: typeof user.statusmonitorauth === 'object' ? user.statusmonitorauth?.auth_info : user.statusmonitorauth,
+                key: nanoid(8),
+            }))
+        );
+    };
 
     const setFormFormat = (formData)=>{
         return {

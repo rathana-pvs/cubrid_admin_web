@@ -122,6 +122,9 @@ body {
     width: 80px;
 }
 
+.small__input{
+    height: 26px !important;
+}
 
 
 /*.button__small{*/

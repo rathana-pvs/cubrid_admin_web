@@ -9,3 +9,4 @@ export const CONFIG_PARAM_CONTENT = [
     {label: "Edit Broker Config", screen: <CubridBrokerConfig/>, key: nanoid(8)},
     {label: "Cubrid Manager Config", screen: <CMConfig/>, key: nanoid(8)},
 ]
+

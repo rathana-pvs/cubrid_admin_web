@@ -1,10 +1,28 @@
+import {Button, Divider, Table} from "antd";
+import EditableTable from "@/components/ui/tables/EditableTable";
+import {nanoid} from "nanoid";
+import React, {useEffect, useState} from "react";
+import {setLoading, setProperty} from "@/state/dialogSlice";
+import {getCubridConfig, setCubridConfig} from "@/utils/api";
+import {
+    createConfigFile,
+    extractConfig,
+    getAPIParam,
+    getExtractConfig,
+    onStartBroker,
+    onStartService,
+    onStopService,
+    replaceConfig
+} from "@/utils/utils";
+import {useDispatch, useSelector} from "react-redux";
+
 const advanceParam = [
     {
         key: "rT6k",
         parameterName: "cubrid_port_id",
         parameterType: "client parameter",
         valueType: "int",
-        parameterValue: "1,523",
+        parameterValue: 1523,
         property: { type: "number" }
     },
     {
@@ -28,7 +46,7 @@ const advanceParam = [
         parameterName: "max_clients",
         parameterType: "server parameter",
         valueType: "int",
-        parameterValue: "100",
+        parameterValue: 100,
         property: { type: "number" }
     },
     {
@@ -44,56 +62,56 @@ const advanceParam = [
         parameterName: "data_buffer_size",
         parameterType: "server parameter",
         valueType: "byte",
-        parameterValue: "32,768 * db_page_size",
-        property: { type: "number" }
+        parameterValue: "512M",
+        property: { type: "text" }
     },
     {
         key: "eR8v",
         parameterName: "index_scan_oid_buffer_size",
         parameterType: "server parameter",
         valueType: "byte",
-        parameterValue: "4 * db_page_size",
-        property: { type: "number" }
+        parameterValue: "64K",
+        property: { type: "text" }
     },
     {
         key: "nT5x",
         parameterName: "max_agg_hash_size",
         parameterType: "server parameter",
         valueType: "byte",
-        parameterValue: "2,097,152(2M)",
-        property: { type: "number" }
+        parameterValue: "2M",
+        property: { type: "text" }
     },
     {
         key: "yM2u",
         parameterName: "max_hash_list_scan_size",
         parameterType: "server parameter",
         valueType: "byte",
-        parameterValue: "8,388,608(8M)",
-        property: { type: "number" }
+        parameterValue: "8M",
+        property: { type: "text" }
     },
     {
         key: "cK9r",
         parameterName: "sort_buffer_size",
         parameterType: "server parameter",
         valueType: "byte",
-        parameterValue: "128 * db_page_size",
-        property: { type: "number" }
+        parameterValue: "2M",
+        property: { type: "text" }
     },
     {
         key: "wP4t",
         parameterName: "temp_file_memory_size_in_pages",
         parameterType: "server parameter",
         valueType: "int",
-        parameterValue: "4",
-        property: { type: "number" }
+        parameterValue: 4,
+        property: { type: "number", min:0, max: 20 }
     },
     {
         key: "jH6q",
         parameterName: "thread_stacksize",
         parameterType: "server parameter",
         valueType: "byte",
-        parameterValue: "1,048,576",
-        property: { type: "number" }
+        parameterValue: "1048576B",
+        property: { type: "text" }
     },
     {
         key: "bN3m",
@@ -101,7 +119,7 @@ const advanceParam = [
         parameterType: "server parameter",
         valueType: "byte",
         parameterValue: "512M",
-        property: { type: "number" }
+        property: { type: "text" }
     },
     {
         key: "tV7x",
@@ -117,14 +135,14 @@ const advanceParam = [
         parameterType: "server parameter",
         valueType: "byte",
         parameterValue: "512M",
-        property: { type: "number" }
+        property: { type: "text" }
     },
     {
         key: "mF9v",
         parameterName: "temp_file_max_size_in_pages",
         parameterType: "server parameter",
         valueType: "int",
-        parameterValue: "-1",
+        parameterValue: -1,
         property: { type: "number" }
     },
     {
@@ -140,7 +158,7 @@ const advanceParam = [
         parameterName: "unfill_factor",
         parameterType: "server parameter",
         valueType: "float",
-        parameterValue: "0.1",
+        parameterValue: 0.1,
         property: { type: "number" }
     },
     {
@@ -156,7 +174,7 @@ const advanceParam = [
         parameterName: "double_write_buffer_size",
         parameterType: "server parameter",
         valueType: "byte",
-        parameterValue: "2M",
+        parameterValue: 2097152,
         property: { type: "number" }
     },
     {
@@ -164,7 +182,7 @@ const advanceParam = [
         parameterName: "data_file_os_advise",
         parameterType: "server parameter",
         valueType: "int",
-        parameterValue: "0",
+        parameterValue: 0,
         property: { type: "number" }
     },
     {
@@ -220,7 +238,7 @@ const advanceParam = [
         parameterName: "error_log_size",
         parameterType: "client/server parameter",
         valueType: "int",
-        parameterValue: "512M",
+        parameterValue: 536870912,
         property: { type: "number" }
     },
     {
@@ -228,7 +246,7 @@ const advanceParam = [
         parameterName: "deadlock_detection_interval_in_secs",
         parameterType: "server parameter",
         valueType: "float",
-        parameterValue: "1.0",
+        parameterValue: 1.0,
         property: { type: "number" }
     },
     {
@@ -236,7 +254,7 @@ const advanceParam = [
         parameterName: "isolation_level",
         parameterType: "client parameter",
         valueType: "int",
-        parameterValue: "4",
+        parameterValue: 4,
         property: { type: "number" }
     },
     {
@@ -244,7 +262,7 @@ const advanceParam = [
         parameterName: "lock_escalation",
         parameterType: "server parameter",
         valueType: "int",
-        parameterValue: "100,000",
+        parameterValue: 100000,
         property: { type: "number" }
     },
     {
@@ -253,7 +271,7 @@ const advanceParam = [
         parameterType: "client parameter",
         valueType: "msec",
         parameterValue: "-1",
-        property: { type: "number" }
+        property: { type: "time" }
     },
     {
         key: "cM2u",
@@ -284,8 +302,8 @@ const advanceParam = [
         parameterName: "checkpoint_every_size",
         parameterType: "server parameter",
         valueType: "byte",
-        parameterValue: "100,000 * log_page_size",
-        property: { type: "number" }
+        parameterValue: "156.25M",
+        property: { type: "text" }
     },
     {
         key: "rV4p",
@@ -293,7 +311,7 @@ const advanceParam = [
         parameterType: "server parameter",
         valueType: "msec",
         parameterValue: "6min",
-        property: { type: "number" }
+        property: { type: "time" }
     },
     {
         key: "qM9w",
@@ -301,7 +319,7 @@ const advanceParam = [
         parameterType: "server parameter",
         valueType: "msec",
         parameterValue: "1",
-        property: { type: "number" }
+        property: { type: "time" }
     },
     {
         key: "xT6u",
@@ -316,15 +334,15 @@ const advanceParam = [
         parameterName: "log_buffer_size",
         parameterType: "server parameter",
         valueType: "byte",
-        parameterValue: "16k * log_page_size",
-        property: { type: "number" }
+        parameterValue: "256MB",
+        property: { type: "text" }
     },
     {
         key: "pN7t",
         parameterName: "log_max_archives",
         parameterType: "server parameter",
         valueType: "int",
-        parameterValue: "INT_MAX",
+        parameterValue: 0,
         property: { type: "number" }
     },
     {
@@ -333,15 +351,15 @@ const advanceParam = [
         parameterType: "server parameter",
         valueType: "msec",
         parameterValue: "0",
-        property: { type: "number" }
+        property: { type: "time" }
     },
     {
         key: "yR8v",
         parameterName: "max_flush_size_per_second",
         parameterType: "server parameter",
         valueType: "byte",
-        parameterValue: "10,000 * db_page_size",
-        property: { type: "number" }
+        parameterValue: "156.2M",
+        property: { type: "text" }
     },
     {
         key: "cT4q",
@@ -349,15 +367,15 @@ const advanceParam = [
         parameterType: "server parameter",
         valueType: "sec",
         parameterValue: "0",
-        property: { type: "number" }
+        property: { type: "time" }
     },
     {
         key: "wM9r",
         parameterName: "sync_on_flush_size",
         parameterType: "server parameter",
         valueType: "byte",
-        parameterValue: "200 * db_page_size",
-        property: { type: "number" }
+        parameterValue: "3.1M",
+        property: { type: "text" }
     },
     {
         key: "jF5p",
@@ -373,7 +391,7 @@ const advanceParam = [
         parameterType: "client parameter",
         valueType: "byte",
         parameterValue: "10M",
-        property: { type: "number" }
+        property: { type: "text" }
     },
     {
         key: "rK7x",
@@ -389,7 +407,7 @@ const advanceParam = [
         parameterType: "server parameter",
         valueType: "msec",
         parameterValue: "0",
-        property: { type: "number" }
+        property: { type: "time" }
     },
     {
         key: "xM8q",
@@ -460,7 +478,7 @@ const advanceParam = [
         parameterName: "cte_max_recursions",
         parameterType: "client/server parameter",
         valueType: "int",
-        parameterValue: "2000",
+        parameterValue: 2000,
         property: { type: "number" }
     },
     {
@@ -468,7 +486,7 @@ const advanceParam = [
         parameterName: "default_week_format",
         parameterType: "client/server parameter",
         valueType: "int",
-        parameterValue: "0",
+        parameterValue: 0,
         property: { type: "number" }
     },
     {
@@ -476,8 +494,8 @@ const advanceParam = [
         parameterName: "group_concat_max_len",
         parameterType: "server parameter",
         valueType: "byte",
-        parameterValue: "1,024",
-        property: { type: "number" }
+        parameterValue: "1024K",
+        property: { type: "text" }
     },
     {
         key: "xV3t",
@@ -516,8 +534,8 @@ const advanceParam = [
         parameterName: "json_max_array_idx",
         parameterType: "server parameter",
         valueType: "string",
-        parameterValue: "65,536",
-        property: { type: "text" }
+        parameterValue: 65536,
+        property: { type: "number" }
     },
     {
         key: "cQ7v",
@@ -580,8 +598,8 @@ const advanceParam = [
         parameterName: "string_max_size_bytes",
         parameterType: "client/server parameter",
         valueType: "byte",
-        parameterValue: "1,048,576",
-        property: { type: "number" }
+        parameterValue: "1048576B",
+        property: { type: "text" }
     },
     {
         key: "pM8x",
@@ -620,7 +638,7 @@ const advanceParam = [
         parameterName: "thread_connection_timeout_seconds",
         parameterType: "server parameter",
         valueType: "int",
-        parameterValue: "300",
+        parameterValue: 300,
         property: { type: "number" }
     },
     {
@@ -636,7 +654,7 @@ const advanceParam = [
         parameterName: "thread_core_count",
         parameterType: "server parameter",
         valueType: "int",
-        parameterValue: "# of system cores",
+        parameterValue: 4,
         property: { type: "number" }
     },
     {
@@ -644,7 +662,7 @@ const advanceParam = [
         parameterName: "thread_worker_timeout_seconds",
         parameterType: "server parameter",
         valueType: "int",
-        parameterValue: "300",
+        parameterValue: 300,
         property: { type: "number" }
     },
     {
@@ -652,7 +670,7 @@ const advanceParam = [
         parameterName: "loaddb_worker_count",
         parameterType: "server parameter",
         valueType: "int",
-        parameterValue: "8",
+        parameterValue: 8,
         property: { type: "number" }
     },
     {
@@ -660,7 +678,7 @@ const advanceParam = [
         parameterName: "server_timezone",
         parameterType: "server parameter",
         valueType: "string",
-        parameterValue: "OS timezone",
+        parameterValue: "",
         property: { type: "text" }
     },
     {
@@ -668,7 +686,7 @@ const advanceParam = [
         parameterName: "timezone",
         parameterType: "client/server parameter",
         valueType: "string",
-        parameterValue: "the value of server_timezone",
+        parameterValue: "",
         property: { type: "text" }
     },
     {
@@ -684,7 +702,7 @@ const advanceParam = [
         parameterName: "max_plan_cache_entries",
         parameterType: "client/server parameter",
         valueType: "int",
-        parameterValue: "1,000",
+        parameterValue: 1000,
         property: { type: "number" }
     },
     {
@@ -692,7 +710,7 @@ const advanceParam = [
         parameterName: "max_plan_cache_clones",
         parameterType: "server parameter",
         valueType: "int",
-        parameterValue: "1,000",
+        parameterValue: 1000,
         property: { type: "number" }
     },
     {
@@ -701,14 +719,14 @@ const advanceParam = [
         parameterType: "client/server parameter",
         valueType: "int",
         parameterValue: "360",
-        property: { type: "number" }
+        property: { type: "time" }
     },
     {
         key: "wN2q",
         parameterName: "max_filter_pred_cache_entries",
         parameterType: "client/server parameter",
         valueType: "int",
-        parameterValue: "1,000",
+        parameterValue: 1000,
         property: { type: "number" }
     },
     {
@@ -716,7 +734,7 @@ const advanceParam = [
         parameterName: "max_query_cache_entries",
         parameterType: "server parameter",
         valueType: "int",
-        parameterValue: "0",
+        parameterValue: 0,
         property: { type: "number" }
     },
     {
@@ -724,7 +742,7 @@ const advanceParam = [
         parameterName: "query_cache_size_in_pages",
         parameterType: "server parameter",
         valueType: "int",
-        parameterValue: "0",
+        parameterValue: 0,
         property: { type: "number" }
     },
     {
@@ -732,7 +750,7 @@ const advanceParam = [
         parameterName: "backup_volume_max_size_bytes",
         parameterType: "server parameter",
         valueType: "byte",
-        parameterValue: "0",
+        parameterValue: 0,
         property: { type: "number" }
     },
     {
@@ -748,7 +766,7 @@ const advanceParam = [
         parameterName: "compactdb_page_reclaim_only",
         parameterType: "server parameter",
         valueType: "int",
-        parameterValue: "0",
+        parameterValue: 0,
         property: { type: "number" }
     },
     {
@@ -756,7 +774,7 @@ const advanceParam = [
         parameterName: "csql_history_num",
         parameterType: "client parameter",
         valueType: "int",
-        parameterValue: "50",
+        parameterValue: 50,
         property: { type: "number" }
     },
     {
@@ -820,7 +838,7 @@ const advanceParam = [
         parameterName: "index_unfill_factor",
         parameterType: "server parameter",
         valueType: "float",
-        parameterValue: "0.05",
+        parameterValue: 0.05,
         property: { type: "number" }
     },
     {
@@ -836,7 +854,7 @@ const advanceParam = [
         parameterName: "java_stored_procedure_port",
         parameterType: "server parameter",
         valueType: "int",
-        parameterValue: "0",
+        parameterValue: 4200,
         property: { type: "number" }
     },
     {
@@ -860,7 +878,7 @@ const advanceParam = [
         parameterName: "multi_range_optimization_limit",
         parameterType: "server parameter",
         valueType: "int",
-        parameterValue: "100",
+        parameterValue: 100,
         property: { type: "number" }
     },
     {
@@ -908,7 +926,7 @@ const advanceParam = [
         parameterName: "session_state_timeout",
         parameterType: "server parameter",
         valueType: "sec",
-        parameterValue: "21,600",
+        parameterValue: 21600,
         property: { type: "number" }
     },
     {
@@ -916,7 +934,7 @@ const advanceParam = [
         parameterName: "sort_limit_max_count",
         parameterType: "client parameter",
         valueType: "int",
-        parameterValue: "1,000",
+        parameterValue: 1000,
         property: { type: "number" }
     },
     {
@@ -925,7 +943,7 @@ const advanceParam = [
         parameterType: "server parameter",
         valueType: "msec",
         parameterValue: "-1",
-        property: { type: "number" }
+        property: { type: "time" }
     },
     {
         key: "kM4u",
@@ -948,7 +966,7 @@ const advanceParam = [
         parameterName: "vacuum_prefetch_log_mode",
         parameterType: "server parameter",
         valueType: "int",
-        parameterValue: "1",
+        parameterValue: 1,
         property: { type: "number" }
     },
     {
@@ -956,15 +974,15 @@ const advanceParam = [
         parameterName: "vacuum_prefetch_log_buffer_size",
         parameterType: "server parameter",
         valueType: "int",
-        parameterValue: "3200 * log_page_size",
-        property: { type: "number" }
+        parameterValue: "50M",
+        property: { type: "text" }
     },
     {
         key: "cR3x",
         parameterName: "data_buffer_neighbor_flush_pages",
         parameterType: "server parameter",
         valueType: "int",
-        parameterValue: "8",
+        parameterValue: 8,
         property: { type: "number" }
     },
     {
@@ -980,7 +998,7 @@ const advanceParam = [
         parameterName: "tde_keys_file_path",
         parameterType: "server parameter",
         valueType: "string",
-        parameterValue: "NULL",
+        parameterValue: "",
         property: { type: "text" }
     },
     {
@@ -1017,11 +1035,135 @@ const advanceParam = [
     }
 ]
 
+let schema = null
+
+export default function (){
+    const dispatch = useDispatch()
+
+    const {servers, brokers} = useSelector(state => state);
+    const {property} = useSelector(state => state.dialog);
+    const [dataSource, setDataSource] = useState(advanceParam)
+    const [server, setServer] = useState({});
+    const [config, setConfig] = useState({})
+    const [configProperty, setConfigProperty] = useState({});
+
+    const columns = [
+        {
+            title: "Parameter Name",
+            dataIndex: "parameterName",
+            key: nanoid(4)
+        },
+        {
+            title: "Parameter Type",
+            dataIndex: "parameterType",
+            key: nanoid(4)
+        },
+        {
+            title: "Value Type",
+            dataIndex: "valueType",
+            key: nanoid(4)
+        },
+        {
+            title: "Parameter Value",
+            dataIndex: "parameterValue",
+            onCell: (record) => ({
+                record,
+                editable: true,
+                dataIndex: 'parameterValue',
+                title: 'Parameter Value',
+                handleSave,
+            }),
+            key: nanoid(4),
+
+        }
+    ]
+
+    const onSave = async () => {
+        let differences = dataSource.filter(data => {
+            let param = advanceParam.find(res => res.key === data.key)
+            return param.parameterValue !== data.parameterValue
+            // return true
+        }).map(res => ({[res.parameterName]: res.parameterValue}))
 
 
 
-let dd = advanceParam.map(item=>{
-    if(item.valueType === "number"){
+        const flatObject = Object.assign({}, ...differences);
+        const {service, server: serverName, ...common} = flatObject
+        const data = {...config}
+        data["common"] = {...config["common"], ...common}
+        data["service"] = {...config["service"], service, server: serverName}
+        const file = createConfigFile(data)
 
+        dispatch(setLoading(true));
+        const response = await setCubridConfig({...getAPIParam(server), confdata: file});
+        if (response.status) {
+            await getInitialize()
+            await onStopService(server, dispatch)
+            await onStartService(server, dispatch)
+            dispatch(setLoading(false))
+        }
     }
-})
+    const handleSave = (row) => {
+
+        const newData = dataSource.map(res=>{
+            if(res.key === row.key){
+                return row
+            }
+            return res
+        })
+        setDataSource(newData)
+    };
+
+    const getInitialize = async () => {
+        const server = servers.find(res => res.serverId === property.node.serverId)
+        setServer(server);
+        dispatch(setLoading(true));
+        const response = await getCubridConfig({...getAPIParam(server)});
+        if (response.status) {
+            const lines = response.result.conflist[0].confdata
+            setConfig(lines)
+            const extracted = extractConfig(lines);
+            setConfig(extracted);
+            const {common, service} = extracted
+            const combine = {...common, ...service}
+            let newData = [...dataSource]
+            for(let key in combine){
+                newData = newData.map(res=>{
+                    return res.parameterName === key ? {
+                        ...res, parameterValue: combine[key]
+                    }: res
+                })
+            }
+
+            setDataSource(newData)
+        }
+    }
+
+    useEffect(() => {
+
+        getInitialize().then(r => dispatch(setLoading(false)) )
+    },[])
+
+    return (
+        <div>
+            <div style={{maxHeight: 400, overflowY: 'auto'}}>
+                <EditableTable
+                    columns={columns}
+                    dataSource={dataSource}
+                />
+            </div>
+
+            <div style={{display: "flex", justifyContent: "flex-end", gap: 12, paddingTop: 12}}>
+                <Button type={"primary"}  className={"button__width__80"}
+                        onClick={onSave}
+                >Save</Button>
+                <Button type={"primary"}
+                        className={"button__width__80"}
+                        onClick={()=>{
+                            dispatch(setProperty({open: false}))
+                        }}
+                >Close</Button>
+            </div>
+        </div>
+    )
+}

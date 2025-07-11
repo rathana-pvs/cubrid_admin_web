@@ -1,11 +1,12 @@
 import React, {useContext, useEffect, useRef, useState} from "react";
-import {Modal, Form, Input, Button, Table, Select, InputNumber} from "antd";
+import {Modal, Form, Input, Button, Table, Select, InputNumber, Tabs} from "antd";
 import {getCubridBrokerConfig, setCubridBrokerConfig} from "@/utils/api";
 import {extractParam, getAPIParam} from "@/utils/utils";
 import {useSelector} from "react-redux";
 import {nanoid} from "nanoid";
 import * as Yup from 'yup';
 import styles from '@/components/ui/dialogs/dialog.module.css'
+import TabPane from "antd/es/tabs/TabPane";
 
 
 const defaultBrokerParameters = [
@@ -172,43 +173,71 @@ export default function ({open, type, editData,  brokerData,  onClose, onSave })
         //
         // }
         form.validateFields().then(async (values) => {
-            getValidation({...dataSource}).then(res=>{
-                onSave(values.bname, data)
+            schema.validate({...Object.fromEntries(data.map(res => [res.parameter, res.value])), name: values.bname}).then(res=>{
+                onSave(values.bname, data, editData)
                 onClose()
             }).catch(err=>{
-                console.log(err.errors)
                 setError(err.errors)
+                alertError(err.message)
             })
         })
+    }
 
-
+    const alertError = (message) => {
+        Modal.error({
+            title: "Error",
+            content: message,
+            okText: 'Close',
+        })
     }
     useEffect(()=>{
-
-        const brokerPorts = Object.keys(brokerData).filter(res=>res !== "broker").map(res=>{
+        let exclude = ["broker"]
+        if(editData){
+            exclude.push(`%${editData.name}`)
+        }
+        const brokerPorts = Object.keys(brokerData).filter(res=>!exclude.includes(res)).map(res=>{
             return brokerData[res]["BROKER_PORT"];
         })
 
-        const appId = Object.keys(brokerData).filter(res=>res !== "broker").map(res=>{
+        const appIdList = Object.keys(brokerData).filter(res=>!exclude.includes(res)).map(res=>{
             return brokerData[res]["APPL_SERVER_SHM_ID"];
         })
+
+        const brokerNames = Object.keys(brokerData)
+        // console.log(brokerNames)
         schema = Yup.object().shape({
-            brokerPort: Yup.number()
-                .required("Required")
-                .min(1024)
-                .max(65535)
-                .test("is-duplicate", "duplicated with other", function (value) {
-                    return !brokerPorts.includes(value.toString())
-                }),
-            appId:Yup.number()
-                .required("Required")
-                .min(1024)
-                .max(65535)
-                .test("is-duplicate", "duplicated with other", function (value) {
-                    return !appId.includes(value.toString())
-                })
-        })
-    }, [brokerData])
+            name: Yup.string().required()
+            .test(
+                "is-duplicate",
+                "Broker name is duplicated",
+                function (value) {
+                    return !brokerNames.includes(`%${value}`);
+                }
+            ),
+            BROKER_PORT: Yup.number()
+                .required("Broker port is required")
+                .min(1024, "Broker port must be ≥ 1024")
+                .max(65535, "Broker port must be ≤ 65535")
+                .test(
+                    "is-duplicate",
+                    "Broker port is duplicated",
+                    function (value) {
+                        return !brokerPorts.includes(String(value));
+                    }
+                ),
+            APPL_SERVER_SHM_ID: Yup.number()
+                .required("App ID is required")
+                .min(1024, "App ID must be ≥ 1024")
+                .max(65535, "App ID must be ≤ 65535")
+                .test(
+                    "is-duplicate",
+                    "App ID is duplicated",
+                    function (value) {
+                        return !appIdList.includes(String(value));
+                    }
+                )
+        });
+    }, [type])
 
     useEffect(()=>{
         form.resetFields();
@@ -236,16 +265,23 @@ export default function ({open, type, editData,  brokerData,  onClose, onSave })
 
     const handleSave = (row) => {
         setIsChange(true)
-        console.log(row)
         const newData = dataSource.map(res=>{
             if(res.key === row.key){
                 return row
             }
             return res
         })
-
         setDataSource(newData)
+        let value = row.value
+        if(row.property.type === "number")
+            value = Number(row.value);
 
+        schema.fields[row.parameter].validate(value).then(res=>{})
+
+            .catch(err=>{
+                setError(err.errors)
+                alertError(err.message)
+        })
     };
     return (
         <Modal
@@ -270,6 +306,9 @@ export default function ({open, type, editData,  brokerData,  onClose, onSave })
         >
 
                 <div style={{maxHeight: 500, overflowY: 'auto', width:'100%'}}>
+
+
+
                     <Form form={form} layout="horizontal">
                         <div className={styles.db__layout}>
                             <Form.Item
