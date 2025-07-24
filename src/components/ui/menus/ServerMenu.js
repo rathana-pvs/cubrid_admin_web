@@ -5,7 +5,7 @@ import {nanoid} from "nanoid";
 import {setLocalStorage} from "@/utils/storage";
 import {useDispatch, useSelector} from "react-redux";
 import {serverDisconnect} from "@/state/sharedAction";
-import {setConnection, setProperty} from "@/state/dialogSlice";
+import {setConnection, setProperty, setVersion} from "@/state/dialogSlice";
 import {deleteServer} from "@/state/serverSlice";
 
 export default function({node, event, open, onClose}) {
@@ -65,7 +65,7 @@ export default function({node, event, open, onClose}) {
             key: nanoid(4),
             icon: <DeleteOutlined style={{color: 'var(--danger-color)'}} />,
             onClick: ()=> {
-
+                dispatch(setVersion(true))
             }
 
         },

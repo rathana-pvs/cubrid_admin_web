@@ -2,6 +2,7 @@ import {Dropdown} from "antd";
 import styles from "@/components/ui/header/header.module.css";
 import React from "react";
 import {useDispatch, useSelector} from "react-redux";
+import {setAbout, setVersion} from "@/state/dialogSlice";
 
 
 
@@ -14,35 +15,50 @@ export default function (){
     const dispatch = useDispatch();
     const menus = [
         {
-            label: 'Help'
+            label: 'Help',
+            onClick: ()=>{
+                window.open('https://www.cubrid.org/', '_blank')
+            }
         },
         {
-            label: 'New Features'
+            label: 'Report Bug',
+            onClick: ()=>{
+                window.open("http://jira.cubrid.org/secure/Dashboard.jspa", "_blank")
+            }
         },
         {
-            label: 'Report Bug'
+            label: 'CUBRID Online Forum',
+            onClick: ()=>{
+                window.open("https://www.reddit.com/r/CUBRID/", "_blank")
+            }
         },
         {
-            label: 'CUBRID Online Forum'
-        },
-        {
-            label: 'CUBRID tools developments'
+            label: 'CUBRID tools developments',
+            onClick: ()=>{
+                window.open("https://github.com/CUBRID/cubrid-manager", "_blank")
+            }
         },
         {
             label: 'Check for Updates'
         },
         {
-            label: 'Server Version'
+            label: 'Server Version',
+            onClick: ()=>{
+                dispatch(setVersion(true))
+            }
         },
         {
-            label: 'About CUBRID Admin'
+            label: 'About CUBRID Admin',
+            onClick: ()=>{
+                dispatch(setAbout(true))
+            }
         },
     ]
 
     return (
         <Dropdown menu={{items: menus}}>
             <div className={styles.dropdown__menu} onClick={(e) => e.preventDefault()}>
-                Action
+                Help
             </div>
         </Dropdown>
     )

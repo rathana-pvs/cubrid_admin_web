@@ -25,8 +25,7 @@ export default function (){
             key: "config",
             children: [
                 {label: "Server Common Parameters", key: "common", onClick: () => setScreen("common"),},
-                {label: "Broker", key: "broker", onClick: () => setScreen("broker"),},
-                {label: "Check Non-Digits", key: "digit", onClick: () => setScreen("digit"),},
+                {label: "Broker", key: "broker", onClick: () => setScreen("broker")}
             ]
         }
     ]

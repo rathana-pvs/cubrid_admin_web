@@ -17,7 +17,6 @@ export default function (){
     const disabled = selectedObject.type !== "server";
     const connection = useSelector(state => state.dialog.connection);
     const dispatch = useDispatch();
-    console.log(CONFIG_PARAM_CONTENT)
     const menus = [
         {
             label: 'Show Host Dashboard',

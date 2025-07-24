@@ -220,3 +220,18 @@ export const getAccessLog = async (data) => {
     const response = await request.post("/api/get-access-log", data).then(res => res.data);
     return getResponse(response);
 }
+
+export const getDBLog = async (data) => {
+    const response = await request.post("/api/get-db-log", data).then(res => res.data);
+    return getResponse(response);
+}
+
+export const getVersion = async (data) => {
+    const response = await request.post("/api/get-version", data).then(res => res.data);
+    return getResponse(response);
+}
+
+export const getBrokerStatus = async (data) => {
+    const response = await request.post("/api/get-broker-status", data).then(res => res.data);
+    return getResponse(response);
+}

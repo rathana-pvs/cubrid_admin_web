@@ -1081,8 +1081,8 @@ export default function (){
     const onSave = async () => {
         let differences = dataSource.filter(data => {
             let param = advanceParam.find(res => res.key === data.key)
-            return param.parameterValue !== data.parameterValue
-            // return true
+            // return param.parameterValue !== data.parameterValue
+            return true
         }).map(res => ({[res.parameterName]: res.parameterValue}))
 
 

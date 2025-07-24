@@ -23,6 +23,8 @@ import PlanDump from "@/components/ui/dialogs/PlanDump";
 import ChangeCMPassword from "@/components/ui/dialogs/ChangeCMPassword";
 import ParamDump from "@/components/ui/dialogs/ParamDump";
 import Property from "@/components/ui/dialogs/property/Property";
+import AboutCubrid from "@/components/ui/dialogs/AboutCubrid";
+import Version from "@/components/ui/dialogs/Version";
 
 
 export default function (props) {
@@ -65,6 +67,8 @@ export default function (props) {
                 <ParamDump/>
                 <ChangeCMPassword/>
                 <Property/>
+                <AboutCubrid/>
+                <Version/>
                 {/*<DBLogin/>*/}
                 {/*<LoadingScreen/>*/}
                 {/*<CreateDatabase/>*/}

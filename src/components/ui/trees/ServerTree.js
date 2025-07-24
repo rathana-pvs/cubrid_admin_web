@@ -15,7 +15,16 @@ import {setTrigger} from "@/state/triggerSlice";
 import {setColumn} from "@/state/columnSlice";
 import {addContents, setActivePanel, setSelectedObject} from "@/state/generalSlice";
 import {setSubServer} from "@/state/subServerSlice";
-import {getAdminLog, getBrokerLog, getBrokers, getDatabases, getDBUser, getTables} from "@/utils/api";
+import {
+    getAccessLog,
+    getAdminLog,
+    getBrokerLog,
+    getBrokers,
+    getDatabases,
+    getDBLog,
+    getDBUser,
+    getTables
+} from "@/utils/api";
 import ServerMenu from "@/components/ui/menus/ServerMenu";
 import BrokersMenu from "@/components/ui/menus/BrokersMenu";
 import BrokerMenu from "@/components/ui/menus/BrokerMenu";
@@ -26,9 +35,15 @@ import ViewSQLLog from "@/components/ui/contents/broker/ViewSQLLog";
 import DatabaseMenu from "@/components/ui/menus/DatabaseMenu";
 import * as database from "framer-motion/m";
 import item from "jsonwebtoken/lib/NotBeforeError";
-import {setAdminLog} from "@/state/logSlicce";
+import {setAdminLog, setDBErrorLogs, setErrorLogs, setSubServerLogs} from "@/state/logSlicce";
 import AccessLog from "@/components/ui/contents/log/manager/AccessLog";
 import ErrorLog from "@/components/ui/contents/log/manager/ErrorLog";
+import useLoadServer from "@/hook/useLoadServer";
+import BrokerErrorLog from "@/components/ui/contents/log/broker/BrokerErrorLog";
+import ServerErrorLog from "@/components/ui/contents/log/server/ServerErrorLog";
+import Dashboard from "@/components/ui/contents/dashboard/Dashboard";
+import BrokersStatus from "@/components/ui/contents/broker/BrokersStatus";
+import BrokerStatus from "@/components/ui/contents/broker/BrokerStatus";
 
 
 function buildTree(...dataSets) {
@@ -37,7 +52,7 @@ function buildTree(...dataSets) {
         map.set(item.key, { ...item, children: item.sub?item.sub:[] });
     });
     const tree = [];
-    console.log(map)
+    console.log(map);
     map.forEach((node) => {
         if (node.parentId) {
             const parent = map.get(node.parentId);
@@ -46,7 +61,6 @@ function buildTree(...dataSets) {
             tree.push(node);
         }
     });
-    console.log(tree);
     return tree;
 }
 
@@ -66,6 +80,11 @@ const panels = [
     {type: "broker_log_file", children: <ViewSQLLog/>},
     {type: "manager_access_log", children: <AccessLog/>},
     {type: "manager_error_log", children: <ErrorLog/>},
+    {type: "broker_error_log", children: <BrokerErrorLog/>},
+    {type: "server_db_log", children: <ServerErrorLog/>},
+    {type: "server", children: <Dashboard/>},
+    {type: "brokers", children: <BrokersStatus/>},
+    {type: "broker", children: <BrokerStatus/>},
 ]
 const menus = [
     {type: "server", Screen: ServerMenu},
@@ -84,8 +103,11 @@ const menus = [
 ]
 
 const App = () => {
-    const {servers, subServers, databases, brokers, tables, views,
+    const {databases, brokers, tables, views,
+        servers, subServers,
         users, triggers, columns, logs, ...state} = useSelector(state=> state);
+
+    // const {servers, subServers} = useSelector(state => state.navigator);
     const {contents} = useSelector(state=> state.general);
     const dispatch = useDispatch();
     const [subLogger, setSubLogger] = useState([]);
@@ -109,6 +131,7 @@ const App = () => {
     }, []);
 
     const onSelect = async (selectedKeys, info) => {
+        console.log(info)
         const server = servers.find(res=>res.serverId === info.node.serverId);
         if(selectedKeys.length > 0){
             dispatch(setSelectedObject({...info.node, server: server}));
@@ -132,6 +155,7 @@ const App = () => {
         // if (loadedKeys.includes(node.key)) return;
         switch (node.type) {
             case "server":{
+                // useLoadServer(node)
                 const result = await setToken({...node})
                 if (result.token) {
 
@@ -180,17 +204,15 @@ const App = () => {
 
                             dispatch(setBroker([...brokers, ...newBrokers]))
                             dispatch(setSubServer([...subServers, ...newSubServer]))
-
-
                     }
                 }else{
                     Modal.error({
                             title: "Connection Failed",
-                            content: response.note,
+                            content: result.note,
                             okText: "Close"
                         }
                     )
-                    throw new Error(response.note);
+                    throw new Error(result.note);
                 }
 
                 break
@@ -268,7 +290,7 @@ const App = () => {
                                 title: "Access Log",
                                 key: nanoid(8),
                                 type: "manager_access_log",
-                                icon: <i className="fa-solid fa-file"></i>,
+                                icon: <i className="fa-light fa-file"></i>,
                                 isLeaf:true
 
                             },
@@ -278,7 +300,7 @@ const App = () => {
                                 title: "Error Log",
                                 key: nanoid(8),
                                 type: "manager_error_log",
-                                icon: <i className="fa-solid fa-file error"></i>,
+                                icon: <i className="fa-light fa-file error"></i>,
                                 isLeaf: true,
                             }
                         ]
@@ -289,8 +311,7 @@ const App = () => {
                         title: "Server",
                         key: nanoid(8),
                         type: "log_server",
-                        icon: <i className="fa-light fa-server"></i>,
-                        sub: []
+                        icon: <i className="fa-light fa-server"></i>
                     }
                 ]
                 setSubLogger(subLog)
@@ -404,9 +425,9 @@ const App = () => {
                 const server = servers.find(item => item.serverId === node.serverId)
                 const database = databases.find(item => item.key === node.parentId)
                 let allView = []
-                const {result} = await axios.post("/api/list-tables",
+                const {result} = await getTables(
                     {...getAPIParam(server), database: database.title, virtual: "view" })
-                    .then(res => res.data);
+
                 const viewId = nanoid(8)
                 allView.push({
                     serverId: node.serverId,
@@ -556,7 +577,8 @@ const App = () => {
                             parentId: node.key,
                             key: nanoid(8),
                             title: `${res.path.split("/").pop()}`,
-                            icon: <i className="fa-solid fa-file"></i>,
+                            icon: <i className="fa-light fa-file"></i>,
+                            isLeaf: true
 
                         }
                     })
@@ -564,24 +586,74 @@ const App = () => {
                 }
             break;
             }
+            case "folder_error_log":{
+                const brokerErrorLog = []
+                for(let item of brokers){
+                    const response = await getBrokerLog({...getAPIParam(server), broker: item.name})
+                    if(response.status){
+                        for(let broker of response.result){
+                            if(broker.type === "error"){
+                                let title = broker.path.split("/").pop()
+                                brokerErrorLog.push({
+                                    ...broker,
+                                    serverId: node.serverId,
+                                    parentId: node.key,
+                                    key: `${node.key}-${nanoid(8)}`,
+                                    title: title,
+                                    type: "broker_error_log",
+                                    icon: <i className="fa-light fa-file"></i>,
+                                    isLeaf: true
+
+                                })
+                            }
+                        }
+                    }
+                }
+                dispatch(setErrorLogs(brokerErrorLog))
+
+                break
+            }
             case "log_server":{
                 const response =  await getDatabases({...getAPIParam(server)});
                 if(response.status){
                     const newSubServerLog = response.result.map(item=>{
                         return {
+                            ...item,
                             serverId: node.serverId,
                             parentId: node.key,
-                            key: `${node.key}-${nanoid(8)}`,
+                            key: nanoid(8),
                             title: item.dbname,
                             type: "folder_log_server",
-                            icon: <i className="fa-light fa-folder icon__folder"></i>,
-                            ...item
+                            icon: <i className="fa-solid fa-folder icon__folder"></i>,
+                            isLeaf: false
                         }
                     })
-                    // setSubServerLog(newSubServerLog)
+                    dispatch(setSubServerLogs(newSubServerLog))
                 }
+                break
             }
 
+            case "folder_log_server":{
+                const response =  await getDBLog({...getAPIParam(server), dbname: node.title});
+                if(response.status){
+                    const newDBErrorLogs = response.result.map(item=>{
+                        let title = item.path.split("/").pop()
+                        return {
+                            ...item,
+                            serverId: node.serverId,
+                            parentId: node.key,
+                            key: nanoid(8),
+                            title,
+                            icon: <i className="fa-light fa-file"></i>,
+                            type: "server_db_log",
+                            isLeaf: true,
+
+                        }
+                    })
+                    dispatch(setDBErrorLogs([...logs.dbErrorLogs, ...newDBErrorLogs]))
+                }
+                break
+            }
 
         }
 
@@ -596,6 +668,8 @@ const App = () => {
 
     }
     if (!isClient) return null;
+
+    // console.log(subServerLog)
     return (
             <>
                 {renderManu()}
@@ -607,7 +681,8 @@ const App = () => {
                     onSelect={onSelect}
                     treeData={buildTree(servers, subServers, databases,
                         brokers, subLogger, subDatabase,
-                        tables, views, users, triggers, columns, subBrokerLog, [...logs.adminLogs], subServerLog)}
+                        tables, views, users, triggers, columns,
+                        subBrokerLog, [...logs.subServerLogs], logs.adminLogs, logs.errorLogs, logs.dbErrorLogs )}
 
                 />
             </>

@@ -13,6 +13,7 @@ import triggerReducer from "@/state/triggerSlice";
 import columnReducer from "@/state/columnSlice";
 import subServerReducer from "@/state/subServerSlice";
 import logReducer from "@/state/logSlicce";
+import navigatorReducer from "@/state/navigatorSlice";
 
 
 const appReducer = combineReducers({
@@ -27,7 +28,8 @@ const appReducer = combineReducers({
     columns: columnReducer,
     general: generalReducer,
     dialog: dialogReducer,
-    logs: logReducer
+    logs: logReducer,
+    navigator: navigatorReducer
 });
 
 
