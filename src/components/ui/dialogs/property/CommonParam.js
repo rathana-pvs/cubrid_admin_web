@@ -9,6 +9,7 @@ import {getAPIParam, getExtractConfig, parseBoolean, replaceConfig, replaceLine,
 import {value} from "lodash/seq";
 import TabPane from "antd/es/tabs/TabPane";
 import {nanoid} from "nanoid";
+import EditableTable from "@/components/ui/tables/EditableTable";
 
 const defaultConfig = {
     error_log_level: "notification",

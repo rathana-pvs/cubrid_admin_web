@@ -33,17 +33,15 @@ import {setLoginDB} from "@/state/dialogSlice";
 import UserMenu from "@/components/ui/menus/UserMenu";
 import ViewSQLLog from "@/components/ui/contents/broker/ViewSQLLog";
 import DatabaseMenu from "@/components/ui/menus/DatabaseMenu";
-import * as database from "framer-motion/m";
-import item from "jsonwebtoken/lib/NotBeforeError";
 import {setAdminLog, setDBErrorLogs, setErrorLogs, setSubServerLogs} from "@/state/logSlicce";
 import AccessLog from "@/components/ui/contents/log/manager/AccessLog";
 import ErrorLog from "@/components/ui/contents/log/manager/ErrorLog";
-import useLoadServer from "@/hook/useLoadServer";
 import BrokerErrorLog from "@/components/ui/contents/log/broker/BrokerErrorLog";
 import ServerErrorLog from "@/components/ui/contents/log/server/ServerErrorLog";
 import Dashboard from "@/components/ui/contents/dashboard/Dashboard";
 import BrokersStatus from "@/components/ui/contents/broker/BrokersStatus";
 import BrokerStatus from "@/components/ui/contents/broker/BrokerStatus";
+import DatabasesMenu from "@/components/ui/menus/DatabasesMenu";
 
 
 function buildTree(...dataSets) {
@@ -52,7 +50,6 @@ function buildTree(...dataSets) {
         map.set(item.key, { ...item, children: item.sub?item.sub:[] });
     });
     const tree = [];
-    console.log(map);
     map.forEach((node) => {
         if (node.parentId) {
             const parent = map.get(node.parentId);
@@ -88,7 +85,7 @@ const panels = [
 ]
 const menus = [
     {type: "server", Screen: ServerMenu},
-    // {type: "databases", Screen: DatabasesMenu},
+    {type: "databases", Screen: DatabasesMenu},
     {type: "database", Screen: DatabaseMenu},
     // {type: "tables", Screen: TablesMenu},
     // {type: "views", Screen: ViewsMenu},
@@ -131,7 +128,6 @@ const App = () => {
     }, []);
 
     const onSelect = async (selectedKeys, info) => {
-        console.log(info)
         const server = servers.find(res=>res.serverId === info.node.serverId);
         if(selectedKeys.length > 0){
             dispatch(setSelectedObject({...info.node, server: server}));

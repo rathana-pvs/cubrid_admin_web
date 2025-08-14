@@ -235,3 +235,23 @@ export const getBrokerStatus = async (data) => {
     const response = await request.post("/api/get-broker-status", data).then(res => res.data);
     return getResponse(response);
 }
+
+export const getCheckDir = async (data) => {
+    const response = await request.post("/api/get-check-dir", data).then(res => res.data);
+    return getResponse(response);
+}
+
+export const getCheckFile = async (data) => {
+    const response = await request.post("/api/get-check-file", data).then(res => res.data);
+    return getResponse(response);
+}
+
+export const getCreateDB = async (data) => {
+    const response = await request.post("/api/get-create-db", data).then(res => res.data);
+    return getResponse(response);
+}
+
+export const setAutoAddVol = async (data) => {
+    const response = await request.post("/api/set-auto-add-vol", data).then(res => res.data);
+    return getResponse(response);
+}

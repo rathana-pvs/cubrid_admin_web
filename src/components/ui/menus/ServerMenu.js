@@ -5,8 +5,10 @@ import {nanoid} from "nanoid";
 import {setLocalStorage} from "@/utils/storage";
 import {useDispatch, useSelector} from "react-redux";
 import {serverDisconnect} from "@/state/sharedAction";
-import {setConnection, setProperty, setVersion} from "@/state/dialogSlice";
+import {setConnection, setProperty, setUnifySetting, setVersion} from "@/state/dialogSlice";
 import {deleteServer} from "@/state/serverSlice";
+import {addContents} from "@/state/generalSlice";
+import {CONFIG_PARAM_CONTENT, UNIFY_SETTING_CONTENT} from "@/utils/data";
 
 export default function({node, event, open, onClose}) {
     const state = useSelector(state => state);
@@ -43,21 +45,18 @@ export default function({node, event, open, onClose}) {
             label: 'Export Connections to JDBC/CCI URL',
             key: nanoid(4),
             icon: <DeleteOutlined style={{color: 'var(--danger-color)'}} />,
-            onClick: ()=> onDelete()
 
         },
         {
             label: 'Change Manager\'s Password',
             key: nanoid(4),
             icon: <DeleteOutlined style={{color: 'var(--danger-color)'}} />,
-            onClick: ()=> onDelete()
 
         },
         {
             label: 'Show Host Dashboard',
             key: nanoid(4),
             icon: <DeleteOutlined style={{color: 'var(--danger-color)'}} />,
-            onClick: ()=> onDelete()
 
         },
         {
@@ -81,7 +80,10 @@ export default function({node, event, open, onClose}) {
             label: 'Unify settings editor',
             key: nanoid(4),
             icon: <DeleteOutlined style={{color: 'var(--danger-color)'}} />,
-            onClick: ()=> onDelete()
+            onClick: ()=> {
+                dispatch(setUnifySetting({open: true, node}))
+                //
+            }
 
         },
     ]

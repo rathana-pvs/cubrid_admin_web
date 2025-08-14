@@ -1,38 +1,31 @@
 import {Dropdown} from "antd";
 import {
-    EditOutlined,
+    ApiOutlined,
+    DeleteOutlined,
+    DownloadOutlined,
+    EditOutlined, FileExcelOutlined, PicRightOutlined,
     PlusOutlined, ReloadOutlined,
+    UploadOutlined
 } from "@ant-design/icons";
 import {nanoid} from "nanoid";
-import {useDispatch, useSelector} from "react-redux";
-import {onStartBroker, onStopBroker} from "@/utils/utils";
+import {setLocalStorage} from "@/utils/storage";
+import {setCreateDB} from "@/state/dialogSlice";
+import {useDispatch} from "react-redux";
 
 export default function({node, event, open, onClose}) {
-    const state = useSelector(state => state);
     const dispatch = useDispatch();
     const {clientX, clientY} = event;
-    const started = node.status === "ON";
     const menuItems = [
         {
-            label: started ? "Stop Broker": "Start Broker",
+            label: "Create Database",
             key: nanoid(4),
             icon: <PlusOutlined />,
-            onClick: async () => {
-                if (started) {
-                    await onStopBroker(node, state, dispatch)
-                } else {
-                    await onStartBroker(node, state, dispatch)
-                }
+            onClick: ()=>{
+                dispatch(setCreateDB({open: true, node}));
             },
         },
         {
-            label: "status",
-            key: nanoid(4),
-            icon: <ReloadOutlined />,
-
-        },
-        {
-            label: "properties",
+            label: "Properties",
             key: nanoid(4),
             icon: <ReloadOutlined />,
 

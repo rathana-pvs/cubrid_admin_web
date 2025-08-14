@@ -8,6 +8,7 @@ const agent = new https.Agent({
 });
 // Create Axios instance with the custom HTTPS agent
 const axiosInstance = axios.create({
+    timeout: 0,
     httpsAgent: agent, // Attach the agent here
     headers: {
         'Content-Type': 'application/json',

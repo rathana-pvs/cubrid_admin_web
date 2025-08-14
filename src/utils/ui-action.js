@@ -13,4 +13,4 @@ export function confirmAction  ({content, onOk, onCancel}) {
             onOk()
         }
     });
-};
+}

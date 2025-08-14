@@ -39,7 +39,9 @@ export const formatMenuData = (data) => {
     });
 
 }
-
+export function isEmptyString(str){
+    return !str || str.trim() === ""
+}
 export const typeDisplay = (type) => {
     if(type.includes("character varying(")){
         return type.replace("character varying", "varchar");
@@ -331,7 +333,7 @@ export const extractParam = (lines)=>{
         }
 
         // Handle key=value lines
-        if (currentSection && trimmed.includes('=')) {
+        if (currentSection && trimmed.includes('=') && !trimmed.startsWith("#")) {
             const [key, value] = trimmed.split('=');
             const cleanKey = key.trim();
             result[currentSection][cleanKey] = value.trim();

@@ -25,6 +25,8 @@ import ParamDump from "@/components/ui/dialogs/ParamDump";
 import Property from "@/components/ui/dialogs/property/Property";
 import AboutCubrid from "@/components/ui/dialogs/AboutCubrid";
 import Version from "@/components/ui/dialogs/Version";
+import CreateDatabase from "@/components/ui/dialogs/CreateDatabase";
+import UnifySetting from "@/components/ui/dialogs/UnifySetting";
 
 
 export default function (props) {
@@ -69,9 +71,10 @@ export default function (props) {
                 <Property/>
                 <AboutCubrid/>
                 <Version/>
+                <UnifySetting/>
                 {/*<DBLogin/>*/}
                 {/*<LoadingScreen/>*/}
-                {/*<CreateDatabase/>*/}
+                <CreateDatabase/>
                 {/*<UserManagement/>*/}
             </Layout>
         </IntlProvider>

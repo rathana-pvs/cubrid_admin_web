@@ -18,13 +18,14 @@ const EditableRow = ({ index, ...props }) => {
 
 
 const InputType = ({property, ...props}) => {
-    switch (property.type) {
+    console.log(props);
+    switch (props.type) {
         case "select":
             return <Select {...props}>
-                {property.value.map(res=><Option key={nanoid(4)} value={res.toLowerCase()}>{res}</Option>)}
+                {props.list.map(res=><Option key={nanoid(4)} value={res.toLowerCase()}>{res}</Option>)}
             </Select>
         case "number":
-            return <Input type={"number"} {...props} {...property.props}/>
+            return <Input {...props} />
 
         default:
             return <Input {...props}/>
@@ -40,6 +41,7 @@ const EditableCell = (props) => {
         record,
         handleSave,
         property,
+        cellProps,
         ...restProps
     } = props;
     const form = useContext(EditableContext);
@@ -82,7 +84,7 @@ const EditableCell = (props) => {
                 style={{ margin: 0 }}
                 name={dataIndex}
             >
-                <InputType property={record.property} ref={inputRef} onPressEnter={save} onBlur={save} size="small" />
+                <InputType property={record.property} ref={inputRef} {...cellProps} onPressEnter={save} onBlur={save} size="small" />
 
             </Form.Item>
         ) : (
