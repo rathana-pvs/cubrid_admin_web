@@ -27,6 +27,7 @@ import AboutCubrid from "@/components/ui/dialogs/AboutCubrid";
 import Version from "@/components/ui/dialogs/Version";
 import CreateDatabase from "@/components/ui/dialogs/CreateDatabase";
 import UnifySetting from "@/components/ui/dialogs/UnifySetting";
+import BrokerLogParser from "@/components/ui/dialogs/BrokerLogParser";
 
 
 export default function (props) {
@@ -72,6 +73,7 @@ export default function (props) {
                 <AboutCubrid/>
                 <Version/>
                 <UnifySetting/>
+                <BrokerLogParser/>
                 {/*<DBLogin/>*/}
                 {/*<LoadingScreen/>*/}
                 <CreateDatabase/>

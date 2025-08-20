@@ -675,3 +675,22 @@ const sectionComment = {
     lines.push(``);
     return lines
 }
+
+
+export function extractSQL(logText) {
+    // Regex to match SQL statements that start with common keywords
+    const sqlRegex = /\b(CREATE|ALTER|INSERT|UPDATE|DELETE|SELECT|DROP|TRUNCATE)\b[\s\S]*?(?=$|\r?\n)/gi;
+
+    let statements = [];
+    let match;
+    while ((match = sqlRegex.exec(logText)) !== null) {
+        let stmt = match[0].trim();
+
+        // Skip lines that are not valid SQL
+        if (!stmt.toLowerCase().startsWith("error")) {
+            statements.push(stmt);
+        }
+    }
+
+    return statements;
+}

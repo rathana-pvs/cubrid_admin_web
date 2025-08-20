@@ -10,7 +10,7 @@ import {
     onStopBrokers, onStopDatabase,
     onStopService
 } from "@/utils/utils";
-import {setChangeCMPassword, setUserManagement} from "@/state/dialogSlice";
+import {setBrokerParser, setChangeCMPassword, setUserManagement} from "@/state/dialogSlice";
 
 
 
@@ -88,7 +88,10 @@ export default function (){
             disabled: !connected,
         },
         {
-            label: 'Convert Broker log to SQL'
+            label: 'Convert Broker log to SQL',
+            onClick: ()=>{
+                dispatch(setBrokerParser({open: true, node: selectedObject}));
+        }
         },
         {
             label: 'Convert Output of broker_log_top to excel'

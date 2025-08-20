@@ -8,7 +8,7 @@ import {
     getCheckFile,
     getCreateDB, getCubridConfig,
     getOptimizeDB,
-    getTables,
+    getTables, getVersion,
     setAutoAddVol,
     setCubridConfig, startDatabase, updateUser, updateUserDB
 } from "@/utils/api";
@@ -60,6 +60,9 @@ export default function (){
     const [password, setPassword] = useState("");
     const [isValid, setIsValid] = useState(false);
     const [selectedRowKey, setSelectedRowKey] = useState(null);
+    const [newVersion, setNewVersion] = useState(false)
+
+
 
     const [addVolCheck, setAddVolCheck] = useState({
         data: false,
@@ -210,9 +213,26 @@ export default function (){
     }
 
 
+    useEffect(()=>{
+
+        if(createDB.node){
+            const server = servers.find(res => res.serverId === createDB.node.serverId);
+            getVersion({...getAPIParam(server)}).then(res=>{
+                if(res.status){
+                    const shortVersion = res.result["CUBRIDVER"].match(/\d+\.\d+/)[0]
+                    if(parseFloat(shortVersion) >= 10.2){
+                        setNewVersion(true)
+                    }
+                }
+
+            })
+        }
+
+    },[createDB.node])
 
     useEffect(() => {
         // dispatch(setCreateDB({open: true}))
+
 
         if(pageId === 0){
             form.setFieldsValue({
@@ -226,30 +246,50 @@ export default function (){
                 db_volume_size: 512
             })
         }else if(pageId === 1){
-            setExvol([
-                {
-                    volume_name: `${dbname}_data_x001`,
-                    volume_type: "data",
-                    volume_size: 512,
-                    volume_path: `/home/cubrid/CUBRID/${dbname}`,
-                    key: nanoid(4)
-                },
-                {
-                    volume_name: `${dbname}_index_x001`,
-                    volume_type: "index",
-                    volume_size: 512,
-                    volume_path: `/home/cubrid/CUBRID/${dbname}`,
-                    key: nanoid(4)
-                },
-                {
-                    volume_name: `${dbname}_temp_x001`,
-                    volume_type: "temp",
-                    volume_size: 512,
-                    volume_path: `/home/cubrid/CUBRID/${dbname}`,
-                    key: nanoid(4)
-                }
-            ])
 
+            if(newVersion){
+                setExvol([
+                    {
+                        volume_name: `${dbname}_data_x001`,
+                        volume_type: "data",
+                        volume_size: 512,
+                        volume_path: `/home/cubrid/CUBRID/${dbname}`,
+                        key: nanoid(4)
+                    },
+                    {
+                        volume_name: `${dbname}_temp_x001`,
+                        volume_type: "temp",
+                        volume_size: 512,
+                        volume_path: `/home/cubrid/CUBRID/${dbname}`,
+                        key: nanoid(4)
+                    }
+                ])
+            }else{
+                setExvol([
+                    {
+                        volume_name: `${dbname}_data_x001`,
+                        volume_type: "data",
+                        volume_size: 512,
+                        volume_path: `/home/cubrid/CUBRID/${dbname}`,
+                        key: nanoid(4)
+                    },
+                    {
+                        volume_name: `${dbname}_index_x001`,
+                        volume_type: "index",
+                        volume_size: 512,
+                        volume_path: `/home/cubrid/CUBRID/${dbname}`,
+                        key: nanoid(4)
+                    },
+                    {
+                        volume_name: `${dbname}_temp_x001`,
+                        volume_type: "temp",
+                        volume_size: 512,
+                        volume_path: `/home/cubrid/CUBRID/${dbname}`,
+                        key: nanoid(4)
+                    }
+                ])
+            }
+            
             form.setFieldsValue({
                 volume_name: `${dbname}_data_x002`,
                 volume_type: "data",
@@ -401,6 +441,79 @@ export default function (){
             </Row>
         }
         else if(pageId === 1){
+
+            if(newVersion){
+                return <Row gutter={[12, 4]}>
+                    <div className={styles.db__layout}>
+                        <div className="border__text">Additional Volume</div>
+                        <Col span={24}>
+                            <Form.Item
+                                label="Volume Name"
+                                name="volume_name"
+                                labelCol={{span: 6}}
+                            >
+                                <Input readOnly={true}/>
+                            </Form.Item>
+                        </Col>
+                        <Col span={24}>
+                            <Form.Item
+                                label="Volume Path"
+                                name="volume_path"
+                                labelCol={{span: 6}}
+                            >
+                                <Input />
+                            </Form.Item>
+                        </Col>
+                        <Col span={24}>
+                            <Form.Item
+                                label="Volume Type"
+                                name="volume_type"
+                                labelCol={{span: 6}}
+                            >
+                                <Select>
+                                    <Select.Option value="data">data</Select.Option>
+                                    <Select.Option value="temp">temp</Select.Option>
+                                </Select>
+                            </Form.Item>
+                        </Col>
+
+                        <Col span={24}>
+                            <Form.Item
+                                label="Volume Size (Mbtye): "
+                                name="volume_size"
+                                labelCol={{span: 6}}
+                            >
+                                <Input readOnly={true}/>
+                            </Form.Item>
+                        </Col>
+                        <Col style={{display:"flex", gap: 12, justifyContent: "end", padding: "12px 6px"}}>
+                            <Button type="primary" onClick={handleAddVolume}>
+                                Add Volume
+                            </Button>
+                            <Button type="primary" danger onClick={()=>{
+                                setExvol(exvol.filter(res=>res.key !== selectedRowKey))
+                            }}>
+                                Delete Volume
+                            </Button>
+                        </Col>
+
+                        <EditableTable columns={columns} dataSource={exvol}
+                                       onRow={(record) => ({
+                                           onClick: () => {
+                                               setSelectedRowKey(record.key);
+
+                                           },
+                                       })}
+                                       rowClassName={(record) =>
+                                           record.key === selectedRowKey ? "row__selected" : ""
+                                       }
+
+                        />
+
+                    </div>
+                </Row>
+            }
+
             return <Row gutter={[12, 4]}>
                 <div className={styles.db__layout}>
                     <div className="border__text">Additional Volume</div>
