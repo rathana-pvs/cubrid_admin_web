@@ -11,6 +11,11 @@ import {
     onStopService
 } from "@/utils/utils";
 import {setBrokerParser, setChangeCMPassword, setUserManagement} from "@/state/dialogSlice";
+import {addContents, setActivePanel} from "@/state/generalSlice";
+import SQLEditor from "@/components/ui/contents/editor/SQLEditor";
+import {TOP_TOOL} from "@/utils/data";
+import ServiceDashboard from "@/components/ui/contents/dashboard/ServiceDashboard";
+import {nanoid} from "nanoid";
 
 
 
@@ -97,7 +102,13 @@ export default function (){
             label: 'Convert Output of broker_log_top to excel'
         },
         {
-            label: 'Service Dashboard'
+            label: 'Service Dashboard',
+            onClick: ()=>{
+                let key = nanoid()
+                dispatch(addContents({label: "Service Dashboard", children: <ServiceDashboard/>, key, node: selectedObject}))
+                dispatch(setActivePanel(key))
+            },
+            disabled: !connected,
         },
     ];
 

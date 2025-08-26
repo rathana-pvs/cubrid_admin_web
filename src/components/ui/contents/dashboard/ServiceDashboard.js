@@ -86,40 +86,43 @@ export default function (){
     }
 
 
+    const initData = async () => {
+        const server = servers.find(res => res.serverId === selectedObject.serverId)
+        const response = await getHostStat({...getAPIParam(server)})
 
+        if (response.status) {
+            const {mem_phy_free, mem_phy_total} = response.result
+            setUsage([response.result]);
+            let tps = 0
+            let qps = 0
+            let temp = {
+                time: "Now",
+                disk: "-",
+                memory: `${bytesToGB(mem_phy_total - mem_phy_free)}GB / ${bytesToGB(mem_phy_total)}GB`,
 
-    useEffect(async () => {
-        if (selectedObject.serverId) {
-            const server = servers.find(res => res.serverId === selectedObject.serverId)
-            const response = await getHostStat({...getAPIParam(server)})
-
-            if(response.status){
-                const {mem_phy_free, mem_phy_total} = response.result
-                setUsage([response.result]);
-                let tps = 0
-                let qps = 0
-                let temp = {
-                    time: "Now",
-                    disk: "-",
-                    memory: `${bytesToGB(mem_phy_total - mem_phy_free)}GB / ${bytesToGB(mem_phy_total)}GB`,
-
-                }
-
-                const brokerInfo = await getBrokerSInfo({...getAPIParam(server)})
-
-                if(brokerInfo.status){
-                    brokerInfo.result.forEach(res=>{
-                        tps = tps + parseInt(res.long_tran)
-                        qps = qps + parseInt(res.long_query)
-                    })
-                }
-                temp["tps"] = tps
-                temp["qps"] = qps
-                setData([temp])
             }
 
+            const brokerInfo = await getBrokerSInfo({...getAPIParam(server)})
+
+            if (brokerInfo.status) {
+                brokerInfo.result.forEach(res => {
+                    tps = tps + parseInt(res.long_tran)
+                    qps = qps + parseInt(res.long_query)
+                })
+            }
+            temp["tps"] = tps
+            temp["qps"] = qps
+            setData([temp])
+            console.log(data)
         }
-    },[selectedObject])
+    }
+
+
+    useEffect(() => {
+        initData()
+
+
+    },[])
 
 
     return <Table pagination={false} columns={columns} dataSource={data} />

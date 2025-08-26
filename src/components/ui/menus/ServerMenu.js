@@ -38,7 +38,7 @@ export default function({node, event, open, onClose}) {
             label: 'Delete Host',
             key: nanoid(4),
             icon: <DeleteOutlined style={{color: 'var(--danger-color)'}} />,
-            onClick: ()=> dispatch(deleteServer(node))
+            onClick: ()=> dispatch(deleteServer(node.serverId))
 
         },
         {

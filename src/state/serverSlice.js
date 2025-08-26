@@ -12,7 +12,9 @@ const serverSlice = createSlice({
             return action.payload;
         },
         deleteServer: (state, action) => {
-            const servers = state.filter(server => server.id === action.payload);
+            console.log(action.payload);
+            const servers = state.filter(server => server.serverId !== action.payload);
+            console.log(servers);
             setLocalStorage("connections", servers);
             return servers;
         }

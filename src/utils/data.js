@@ -6,6 +6,7 @@ import UnifyCubridConfig from "@/components/ui/contents/unify-setting/CubridConf
 import UnifyBrokerConfig from "@/components/ui/contents/unify-setting/BrokerConfig"
 import UnifyCMConfig from "@/components/ui/contents/unify-setting/CMConfig"
 import SQLEditor from "@/components/ui/contents/editor/SQLEditor";
+import ServiceDashboard from "@/components/ui/contents/dashboard/ServiceDashboard";
 export const CONFIG_PARAM_CONTENT = [
     {label: "Edit Cubrid Config", screen: <CubridConfig/>, key: nanoid(8)},
     {label: "Edit Broker Config", screen: <CubridBrokerConfig/>, key: nanoid(8)},
@@ -20,4 +21,5 @@ export const UNIFY_SETTING_CONTENT = [
 
 export const TOP_TOOL = ()=>[
     {label: "SQL Editor", children: <SQLEditor/>, key: nanoid(8)},
+    {label: "Service Dashboard", children: <ServiceDashboard/>, key: nanoid(8)},
 ]

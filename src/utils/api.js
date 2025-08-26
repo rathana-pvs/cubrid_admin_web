@@ -236,6 +236,11 @@ export const getBrokerStatus = async (data) => {
     return getResponse(response);
 }
 
+export const getBrokerSInfo = async (data) => {
+    const response = await request.post("/api/get-brokers-info", data).then(res => res.data);
+    return getResponse(response);
+}
+
 export const getCheckDir = async (data) => {
     const response = await request.post("/api/get-check-dir", data).then(res => res.data);
     return getResponse(response);
@@ -253,5 +258,10 @@ export const getCreateDB = async (data) => {
 
 export const setAutoAddVol = async (data) => {
     const response = await request.post("/api/set-auto-add-vol", data).then(res => res.data);
+    return getResponse(response);
+}
+
+export const getHostStat = async (data) => {
+    const response = await request.post("/api/get-host-stat", data).then(res => res.data);
     return getResponse(response);
 }

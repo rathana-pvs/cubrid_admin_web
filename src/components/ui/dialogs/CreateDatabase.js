@@ -691,25 +691,31 @@ export default function (){
     }
 
     const updateNextPage = async (counter) => {
+
         const index = pageId + counter
         if (index > -1 && index < 5) {
-            const validate = validation[pageId]
-            if (pageId === 0) {
-                validate.validate({...form.getFieldsValue()}).then(res => {
-                    setDB(form.getFieldsValue())
-                    setPageId(index);
-                })
-            } else if (pageId === 2) {
-                setAddVol(form.getFieldsValue())
+            if(counter === -1){
                 setPageId(index)
-            } else if (pageId === 3) {
-                const {password, confirm_password} = form.getFieldsValue()
-                if (password === confirm_password) {
-                    await handleCreate()
+            }else{
+                const validate = validation[pageId]
+                if (index === 1) {
+                    validate.validate({...form.getFieldsValue()}).then(res => {
+                        setDB(form.getFieldsValue())
+                        setPageId(index);
+                    })
+                } else if (index === 3) {
+                    setAddVol(form.getFieldsValue())
+                    setPageId(index)
+                } else if (index === 4) {
+                    const {password, confirm_password} = form.getFieldsValue()
+                    if (password === confirm_password) {
+                        await handleCreate()
+                    }
+                } else {
+                    setPageId(index)
                 }
-            } else {
-                setPageId(index)
             }
+
 
         }
     }
