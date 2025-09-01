@@ -21,6 +21,7 @@ const initialState = {
     property: {open: false},
     unifySetting: {open: false},
     brokerParser: {open: false},
+    exportHost: false,
     about: false,
     loading: false,
     version: false,
@@ -97,11 +98,14 @@ const dialogSlice = createSlice({
         },
         setBrokerParser: (state, action) => {
             state.brokerParser = action.payload;
+        },
+        setExportHost: (state, action) => {
+            state.exportHost = action.payload;
         }
     },
 });
 
 export const { setConnection, setCompactDB, setCheckDB, setBackupDB,
     setOptimizeDB, setCopyDB, setDeleteDB, setRenameDB,
-    setUserManagement, setBrokerParser, setUnifySetting, setCreateDB, setAbout, setVersion, setProperty, setParamDump, setChangeCMPassword, setPlanDump, setRestoreDB, setUserDB, setLoginDB,  setLoading } = dialogSlice.actions;
+    setUserManagement, setExportHost, setBrokerParser, setUnifySetting, setCreateDB, setAbout, setVersion, setProperty, setParamDump, setChangeCMPassword, setPlanDump, setRestoreDB, setUserDB, setLoginDB,  setLoading } = dialogSlice.actions;
 export default dialogSlice.reducer;

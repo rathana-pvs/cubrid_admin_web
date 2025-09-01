@@ -107,8 +107,7 @@ export default function (){
                 let key = nanoid()
                 dispatch(addContents({label: "Service Dashboard", children: <ServiceDashboard/>, key, node: selectedObject}))
                 dispatch(setActivePanel(key))
-            },
-            disabled: !connected,
+            }
         },
     ];
 

@@ -28,6 +28,7 @@ import Version from "@/components/ui/dialogs/Version";
 import CreateDatabase from "@/components/ui/dialogs/CreateDatabase";
 import UnifySetting from "@/components/ui/dialogs/UnifySetting";
 import BrokerLogParser from "@/components/ui/dialogs/BrokerLogParser";
+import ExportHost from "@/components/ui/dialogs/ExportHost";
 
 
 export default function (props) {
@@ -74,6 +75,7 @@ export default function (props) {
                 <Version/>
                 <UnifySetting/>
                 <BrokerLogParser/>
+                <ExportHost/>
                 {/*<DBLogin/>*/}
                 {/*<LoadingScreen/>*/}
                 <CreateDatabase/>

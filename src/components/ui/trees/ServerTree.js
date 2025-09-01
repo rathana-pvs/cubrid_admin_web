@@ -157,7 +157,7 @@ const App = () => {
 
                     const newServers = servers.map(server => {
                         if(server.serverId === node.serverId){
-                            return {...server, token: result.token};
+                            return {...server, token: result.token, connected: true};
                         }
                         return server;
                     })

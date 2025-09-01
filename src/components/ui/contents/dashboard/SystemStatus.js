@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import { Space, Table, Tag } from 'antd';
 import {useSelector} from "react-redux";
-import {getBrokerSInfo, getBrokerStatus, getDatabases, getHostStat} from "@/utils/api";
+import {getBrokersInfo, getBrokerStatus, getDatabases, getDBSpace, getHostStat} from "@/utils/api";
 import {getAPIParam} from "@/utils/utils";
 const columns = [
     {
@@ -92,7 +92,7 @@ export default function (){
         if (selectedObject.serverId) {
             const server = servers.find(res => res.serverId === selectedObject.serverId)
             const response = await getHostStat({...getAPIParam(server)})
-
+            const resSpaceInfo = await getDBSpace({...getAPIParam(server), database: "demodb"})
             if(response.status){
                 const {mem_phy_free, mem_phy_total} = response.result
                 setUsage([response.result]);
@@ -105,7 +105,7 @@ export default function (){
 
                 }
 
-                const brokerInfo = await getBrokerSInfo({...getAPIParam(server)})
+                const brokerInfo = await getBrokersInfo({...getAPIParam(server)})
 
                 if(brokerInfo.status){
                     brokerInfo.result.forEach(res=>{
@@ -115,10 +115,15 @@ export default function (){
                 }
                 temp["tps"] = tps
                 temp["qps"] = qps
+
+                if(resSpaceInfo.status){
+                    temp["disk"] = (resSpaceInfo.result.freespace / 1024).toFixed(1) + "GB"
+                }
                 setData([temp])
             }
 
         }
+
     },[selectedObject])
 
 

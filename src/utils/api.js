@@ -236,7 +236,7 @@ export const getBrokerStatus = async (data) => {
     return getResponse(response);
 }
 
-export const getBrokerSInfo = async (data) => {
+export const getBrokersInfo = async (data) => {
     const response = await request.post("/api/get-brokers-info", data).then(res => res.data);
     return getResponse(response);
 }
