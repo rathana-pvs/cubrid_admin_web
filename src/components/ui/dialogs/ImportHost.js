@@ -95,7 +95,13 @@ export default function (){
     const handleOk = async () => {
         let saveObject = []
         for(let key of selectedRowKeys) {
-            saveObject.push(createServerFormat(dataSource.find(item => item.id === key)))
+            const server = dataSource.find(item => item.id === key)
+            saveObject.push(createServerFormat({
+                name: server.name,
+                port: server.port,
+                host: server.address,
+                id: server.user
+            }))
         }
 
         dispatch(setServer([...servers, ...saveObject]))
