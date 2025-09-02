@@ -59,6 +59,7 @@ export default function (props){
     const [info, setInfo] = useState([]);
 
     const getBrokerInfo = async () => {
+
         const server = servers.find(item => item.serverId === selectedObject.serverId)
         const data = []
         for (let object of brokers) {

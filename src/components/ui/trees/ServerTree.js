@@ -105,7 +105,7 @@ const App = () => {
         users, triggers, columns, logs, ...state} = useSelector(state=> state);
 
     // const {servers, subServers} = useSelector(state => state.navigator);
-    const {contents} = useSelector(state=> state.general);
+    const {contents, selectedObject} = useSelector(state=> state.general);
     const dispatch = useDispatch();
     const [subLogger, setSubLogger] = useState([]);
     const [subDatabase, setSubDatabase] = useState([]);
@@ -113,6 +113,7 @@ const App = () => {
     const [subServerLog, setSubServerLog] = useState([]);
     const [isClient, setIsClient] = useState(false);
     const [menu, setMenu] = useState({});
+    const [selectedKeys, setSelectedKeys] = useState([]);
 
     const handleContextMenu = (e) => {
         const {node} = e
@@ -127,10 +128,11 @@ const App = () => {
         setIsClient(true);
     }, []);
 
-    const onSelect = async (selectedKeys, info) => {
+    const onSelect = async (keys, info) => {
         const server = servers.find(res=>res.serverId === info.node.serverId);
-        if(selectedKeys.length > 0){
-            dispatch(setSelectedObject({...info.node, server: server}));
+
+        if(keys.length > 0){
+            dispatch(setSelectedObject({...info.node, server: server, key: keys[0]}));
         }else{
             dispatch(setSelectedObject({}));
         }
@@ -673,6 +675,7 @@ const App = () => {
                     onRightClick={handleContextMenu}
                     showLine
                     showIcon
+                    selectedKeys={[selectedObject.key]}
                     loadData={loadData}
                     onSelect={onSelect}
                     treeData={buildTree(servers, subServers, databases,

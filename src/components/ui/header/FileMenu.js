@@ -7,13 +7,14 @@ import {setConnection, setExportHost, setImportHost} from "@/state/dialogSlice";
 import {deleteServer} from "@/state/serverSlice";
 import {useTranslations} from "next-intl";
 import {serverDisconnect} from "@/state/sharedAction";
+import {setActivePanel, setContents, setSelectedObject} from "@/state/generalSlice";
 
 
 
 
 export default function (){
     const t = useTranslations()
-    const selectedObject = useSelector(state => state.general.selectedObject);
+    const {selectedObject, contents, activePanel} = useSelector(state => state.general);
     const disabled = selectedObject.type !== "server";
     const connection = useSelector(state => state.dialog.connection);
     const dispatch = useDispatch();
@@ -49,7 +50,21 @@ export default function (){
 
         },
         {
-            label: 'Close Current & All Window',
+            label: 'Close This Window',
+            onClick: ()=>{
+                const newContent = contents.filter(res=>res.key !== activePanel);
+                dispatch(setContents(newContent));
+                dispatch(setActivePanel(newContent.at(-1).key));
+                dispatch(setSelectedObject({}))
+            }
+        },
+        {
+          label: 'Close all Windows',
+            onClick: ()=>{
+                dispatch(setContents([]));
+                dispatch(setActivePanel(""))
+                dispatch(setSelectedObject({}))
+            }
         },
         {
             label: 'Import Workspace',

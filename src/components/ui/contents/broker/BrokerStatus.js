@@ -3,7 +3,8 @@ import {Divider, Space, Table, Tag} from 'antd';
 import {nanoid} from "nanoid";
 import {useSelector} from "react-redux";
 import {getBrokerStatus} from "@/utils/api";
-import {getAPIParam} from "@/utils/utils";
+import {getAPIParam, isNotEmpty} from "@/utils/utils";
+import {isEmpty} from "lodash";
 const columns = [
     {
         title: 'PID',
@@ -119,12 +120,12 @@ const columnsJobQue = [
 
 export default function (props){
     const {brokers, servers} = useSelector(state=>state);
-    const {selectedObject} = useSelector(state=>state.general);
+    const {selectedObject, activePanel, contents} = useSelector(state=>state.general);
     const [info, setInfo] = useState([]);
     const [brokerStatus, setBrokerStatus] = useState([]);
     const [statusLoading, setStatusLoading] = useState(true);
-
     const getBrokerInfo = async () => {
+
         const server = servers.find(res => res.serverId === selectedObject.serverId)
         const {result} = await getBrokerStatus({...getAPIParam(server), bname: selectedObject.name})
         const newBrokerStatus = result.map(res=>{
@@ -138,8 +139,8 @@ export default function (props){
 
     useEffect(()=>{
         getBrokerInfo()
+
     },[])
-    console.log(info)
     return (
         <div>
             <Table bordered pagination={false} columns={columns} dataSource={info} />
