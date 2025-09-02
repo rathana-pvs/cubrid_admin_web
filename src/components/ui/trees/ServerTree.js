@@ -672,6 +672,7 @@ const App = () => {
             <>
                 {renderManu()}
                 <Tree
+                    defaultExpandAll
                     onRightClick={handleContextMenu}
                     showLine
                     showIcon

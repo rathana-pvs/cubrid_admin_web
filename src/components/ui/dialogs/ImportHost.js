@@ -71,7 +71,12 @@ export default function (){
                         okText: "Close"
                     });
                 } else {
-                    const hostsArray = result.hosts.host.map(h => ({...h.$, key: nanoid(4)}));
+                    let hostsArray = []
+                    if(Array.isArray(result.hosts.host)){
+                        hostsArray = result.hosts.host.map(h => ({...h.$, key: nanoid(4)}));
+                    }else{
+                        hostsArray = [{...result.hosts.host.$, key: nanoid(4)}];
+                    }
                     const uniqueServer = hostsArray.filter(h => {
 
                         return !servers.some(res => res.title === h.name)
@@ -122,7 +127,7 @@ export default function (){
                     <>
                         <Button type="primary" disabled={selectedRowKeys.length === 0} onClick={handleOk} style={{marginRight: 8}}>
 
-                            Export Host
+                            Import Host
                         </Button>
 
                         <Button type={"primary"} variant={"filled"} className={"button button__small"}
