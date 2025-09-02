@@ -3,7 +3,7 @@ import {Dropdown} from "antd";
 import styles from "@/components/ui/header/header.module.css";
 import React from "react";
 import {useDispatch, useSelector} from "react-redux";
-import {setConnection, setExportHost} from "@/state/dialogSlice";
+import {setConnection, setExportHost, setImportHost} from "@/state/dialogSlice";
 import {deleteServer} from "@/state/serverSlice";
 import {useTranslations} from "next-intl";
 import {serverDisconnect} from "@/state/sharedAction";
@@ -30,6 +30,10 @@ export default function (){
         {
             label: 'Export Host Info',
             onClick: () => dispatch(setExportHost(true)),
+        },
+        {
+            label: 'Import Host Info',
+            onClick: () => dispatch(setImportHost(true)),
         },
         {
             label: 'Disconnect Host Connection',

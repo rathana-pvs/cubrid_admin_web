@@ -61,10 +61,12 @@ ${content}
     }
     const handleOk = async () => {
         handleDownload()
+        handleClose()
     };
 
     const handleClose = () => {
         dispatch(setExportHost(false));
+        setSelectedRowKeys([]);
     }
 
     useEffect(()=>{

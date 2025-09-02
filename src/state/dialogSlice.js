@@ -22,6 +22,7 @@ const initialState = {
     unifySetting: {open: false},
     brokerParser: {open: false},
     exportHost: false,
+    importHost: false,
     about: false,
     loading: false,
     version: false,
@@ -101,11 +102,14 @@ const dialogSlice = createSlice({
         },
         setExportHost: (state, action) => {
             state.exportHost = action.payload;
+        },
+        setImportHost: (state, action) => {
+            state.importHost = action.payload;
         }
     },
 });
 
 export const { setConnection, setCompactDB, setCheckDB, setBackupDB,
     setOptimizeDB, setCopyDB, setDeleteDB, setRenameDB,
-    setUserManagement, setExportHost, setBrokerParser, setUnifySetting, setCreateDB, setAbout, setVersion, setProperty, setParamDump, setChangeCMPassword, setPlanDump, setRestoreDB, setUserDB, setLoginDB,  setLoading } = dialogSlice.actions;
+    setUserManagement, setExportHost, setImportHost, setBrokerParser, setUnifySetting, setCreateDB, setAbout, setVersion, setProperty, setParamDump, setChangeCMPassword, setPlanDump, setRestoreDB, setUserDB, setLoginDB,  setLoading } = dialogSlice.actions;
 export default dialogSlice.reducer;
