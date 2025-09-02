@@ -101,6 +101,8 @@ export default function (){
     const handleClose = () => {
         dispatch(setImportHost(false));
         setSelectedRowKeys([]);
+        setFileName("")
+        setDataSource([])
     }
 
     const rowSelection = {
@@ -149,6 +151,7 @@ export default function (){
                         id="fileInput"
                         accept=".xml"
                         style={{ display: "none" }}
+                        value={fileName}
                         onChange={handleFileChange}
                     />
                     <Button type="primary" onClick={() => document.getElementById("fileInput").click()}>
